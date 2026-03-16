@@ -1,7 +1,22 @@
-/* TFS PUBLISH | components.js | Version 35 | March 12, 2026 */
+/* TFS PUBLISH | components.js | Version 38 | March 16, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
+var useRef = React.useRef;
+
+function AutoTextarea(props) {
+  var ref = useRef(null);
+  var mh = (props.style && props.style.minHeight) || 44;
+  var doResize = function() {
+    var el = ref.current;
+    if (!el) return;
+    el.style.height = '0';
+    el.style.height = Math.max(el.scrollHeight, mh) + 'px';
+  };
+  useEffect(function() { doResize(); }, [props.value]);
+  var s = Object.assign({}, props.style || {}, { overflow: 'hidden', resize: 'none' });
+  return <textarea ref={ref} value={props.value} onChange={props.onChange} onInput={doResize} placeholder={props.placeholder} style={s}/>;
+}
 
 function UploadBtn(props) {
   var _u = useState(false), uploading = _u[0], setUploading = _u[1];

@@ -1,4 +1,4 @@
-/* TFS PUBLISH | constants.js | Version 35 | March 12, 2026 */
+/* TFS PUBLISH | constants.js | Version 37 | March 13, 2026 */
 
 var PLATFORMS = [
   { id: "stories", label: "Stories", icon: "fa-solid fa-book-open", color: "#a855f7", special: true },
