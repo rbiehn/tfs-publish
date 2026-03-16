@@ -10,12 +10,14 @@ function AutoTextarea(props) {
   var doResize = function() {
     var el = ref.current;
     if (!el) return;
-    el.style.height = '0';
-    el.style.height = Math.max(el.scrollHeight, mh) + 'px';
+    el.style.height = mh + 'px';
+    var sh = el.scrollHeight;
+    el.style.height = Math.max(sh, mh) + 'px';
   };
   useEffect(function() { doResize(); }, [props.value]);
+  useEffect(function() { doResize(); }, []);
   var s = Object.assign({}, props.style || {}, { overflow: 'hidden', resize: 'none' });
-  return <textarea ref={ref} value={props.value} onChange={props.onChange} onInput={doResize} placeholder={props.placeholder} style={s}/>;
+  return <textarea ref={ref} value={props.value} onChange={function(e) { if (props.onChange) props.onChange(e); setTimeout(doResize, 0); }} placeholder={props.placeholder} style={s}/>;
 }
 
 function UploadBtn(props) {

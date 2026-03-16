@@ -1,4 +1,4 @@
-var CACHE = "tfs-publish-v38";
+var CACHE = "tfs-publish-v38a";
 var urlsToCache = ["./", "./index.html", "./constants.js", "./utils.js", "./components.js", "./app.js", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function(e) {
