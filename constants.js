@@ -1,4 +1,4 @@
-/* TFS PUBLISH | constants.js | Version 37 | March 13, 2026 */
+/* TFS PUBLISH | constants.js | Version 40 | March 16, 2026 */
 
 var PLATFORMS = [
   { id: "stories", label: "Stories", icon: "fa-solid fa-book-open", color: "#a855f7", special: true },
@@ -125,13 +125,13 @@ var CHECKLISTS = {
 
 var TEMPLATES = {
   tiktok: [
-    { key: "copy", label: "Caption", hint: "100-300ch, 800 SEO. ONE CTA in caption.", max: 800, multi: true },
+    { key: "copy", label: "Caption", hint: "100-300ch, 4000 max. ONE CTA in caption.", max: 4000, multi: true },
     { key: "hashtags", label: "Hashtags", hint: "4 total: 1 anchor + 1-2 genre + 0-1 comp. No branded first 30 days" },
     { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
     { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
   ],
   instagram: [
-    { key: "copy", label: "Caption", hint: "125-200ch. Google indexes. ONE CTA (link in bio OK).", max: 500, multi: true },
+    { key: "copy", label: "Caption", hint: "125-200ch. Google indexes. ONE CTA (link in bio OK).", max: 2200, multi: true },
     { key: "hashtags", label: "Hashtags", hint: "5 max: #thefirststone + 4" },
     { key: "prompt", label: "Comment Prompt", hint: "Pinned question at top of comments" },
     { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
@@ -183,7 +183,7 @@ var M_ST_L = { no_media: "No Media", raw_uploaded: "Uploaded", in_editing: "Edit
 
 var MAX_DAYS = 65;
 
-var PLAT_CHAR_LIMITS = { tiktok: 800, instagram: 500, youtube: 5000, fb_page: 5000, fb_personal: 5000, x: 280, threads: 500 };
+var PLAT_CHAR_LIMITS = { tiktok: 4000, instagram: 2200, youtube: 5000, fb_page: 63206, fb_personal: 63206, x: 280, threads: 500 };
 var PLAT_HASHTAG_LIMITS = { tiktok: 4, instagram: 5, youtube: 3, fb_page: 1, fb_personal: 0, fb_groups: 0, x: 2, threads: 1 };
 var TRENDING_PLATFORMS = ["tiktok","instagram","youtube","fb_page"];
 
