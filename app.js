@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 41 | March 18, 2026 */
+/* TFS PUBLISH | app.js | Version 42 | March 19, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -114,7 +114,7 @@ function App() {
   var videoTitle = (dc && dc.topicTitle) || "";
   var schedDate = vd.date ? fmtD(vd.date) : "Unscheduled";
 
-  // ---- PROGRESS (v41: flat checklist) ----
+  // ---- PROGRESS (v42: flat checklist) ----
   var countProgress = function(d, pid) {
     var k = "d" + d + "_" + pid;
     var ck = checks[k] || {};
@@ -152,7 +152,7 @@ function App() {
   var editCk = checks[editCkKey] || {};
   var toggleEditCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[editCkKey] = Object.assign({}, o[editCkKey] || {}); o[editCkKey][id] = !o[editCkKey][id]; return o; }); };
 
-  // ---- CHECKLIST HELPERS (v41) ----
+  // ---- CHECKLIST HELPERS (v42) ----
   var toggleCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); o[pK][id] = !o[pK][id]; return o; }); };
   var resetCk = function() { setCk(function(p) { var o = Object.assign({}, p); o[pK] = {}; return o; }); flash("Checklist reset"); };
   var checkSection = function(prefix, items) { if (!items || !items.length) return; setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); var allDone = true; items.forEach(function(_, i) { if (!o[pK][prefix + i]) allDone = false; }); items.forEach(function(_, i) { o[pK][prefix + i] = !allDone; }); return o; }); };
@@ -255,9 +255,13 @@ function App() {
   var getSections = function(pid) {
     var secs = [];
     var sc = STORY_CHECKLISTS[pid] || {};
+    // YouTube Community Post is the Story 1 equivalent - goes first
+    if (pid === "youtube" && CHECKLISTS.yt_community && CHECKLISTS.yt_community.length) secs.push({ key: "ytc", title: "Community Post (pre-post)", color: "#a855f7", items: CHECKLISTS.yt_community, prefix: "ytc_" });
+    // Story 1 for non-YouTube platforms
     if (sc.s1 && sc.s1.length) secs.push({ key: "s1", title: "Story 1 (Pre-post)", color: "#a855f7", items: sc.s1, prefix: "s1_" });
+    // Main posting steps
     if (CHECKLISTS[pid] && CHECKLISTS[pid].length) secs.push({ key: "post", title: "Posting Steps", color: (aPlat ? aPlat.color : "#888"), items: CHECKLISTS[pid], prefix: "p_" });
-    if (pid === "youtube" && CHECKLISTS.yt_community && CHECKLISTS.yt_community.length) secs.push({ key: "ytc", title: "Community Post", color: "#FF0000", items: CHECKLISTS.yt_community, prefix: "ytc_" });
+    // Post-live stories
     if (sc.s2 && sc.s2.length) secs.push({ key: "s2", title: "Story 2 (After live)", color: "#3b82f6", items: sc.s2, prefix: "s2_" });
     if (sc.s3 && sc.s3.length) secs.push({ key: "s3", title: "Story 3 (Personal)", color: "#22c55e", items: sc.s3, prefix: "s3_" });
     return secs;
@@ -438,7 +442,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v41 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v42 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -753,7 +757,7 @@ function App() {
 
         {/* COPY FIELDS (always at top for grab-and-go) */}
         {tpl&&tpl.length>0&&<div style={{marginBottom:12}}>
-          {tpl.map(function(f){var val=(pc&&pc[f.key])||"";return <div key={f.key} style={{background:"#fff",border:"1px solid #eeeef2",borderRadius:12,padding:"10px 12px",marginBottom:6,boxShadow:"0 1px 3px #00000006"}}>
+          {tpl.map(function(f){var val=(pc&&pc[f.key])||"";return <div key={f.key} style={{background:"#fff",border:"1px solid "+(val?"#eeeef2":"#f59e0b40"),borderRadius:12,padding:"10px 12px",marginBottom:6,boxShadow:"0 1px 3px #00000006"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span style={{fontSize:13,fontWeight:700,color:"#555"}}>{f.label}</span>
               <div style={{display:"flex",gap:4}}>
@@ -761,10 +765,31 @@ function App() {
                 {val&&<button onClick={function(){navigator.clipboard.writeText(val).then(function(){flash(f.label+" copied");});}} style={{background:aPlat?aPlat.color:"#f97316",border:"none",borderRadius:8,padding:"4px 10px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Copy</button>}
               </div>
             </div>
-            {val?<div onClick={function(){navigator.clipboard.writeText(val).then(function(){flash(f.label+" copied");});}} style={{fontSize:13,color:"#2d2d3d",whiteSpace:"pre-wrap",wordBreak:"break-word",lineHeight:1.45,cursor:"pointer",borderRadius:8,padding:4,marginTop:4,background:"#fafafa"}}>{val}</div>:null}
+            {f.hint&&<div style={{fontSize:11,color:"#aaa",marginTop:2}}>{f.hint}</div>}
+            {val?<div onClick={function(){navigator.clipboard.writeText(val).then(function(){flash(f.label+" copied");});}} style={{fontSize:13,color:"#2d2d3d",whiteSpace:"pre-wrap",wordBreak:"break-word",lineHeight:1.45,cursor:"pointer",borderRadius:8,padding:4,marginTop:4,background:"#fafafa"}}>{val}</div>
+            :<div style={{fontSize:12,color:"#ccc",fontStyle:"italic",marginTop:4}}>Not set. Tap Edit to add.</div>}
             {val&&f.max&&<div style={{fontSize:11,color:val.length>f.max?"#ef4444":"#aaa",marginTop:2}}>{val.length}/{f.max}</div>}
           </div>;})}
         </div>}
+
+        {/* PRE-POST REMINDER (Story 1 or YT Community Post) */}
+        {(function(){
+          var sc=STORY_CHECKLISTS[plat]||{};
+          var isYT = plat==="youtube";
+          var preItems = isYT ? (CHECKLISTS.yt_community||[]) : (sc.s1||[]);
+          var prePrefix = isYT ? "ytc_" : "s1_";
+          var preLabel = isYT ? "Community Post goes out before your main upload" : "Story 1 goes out before your main post";
+          var preSub = isYT ? "Post the Community Post first, then come back for the upload" : "Post Story 1 first, then come back for posting steps";
+          if(!preItems.length)return null;
+          var preDone=secDoneCount(preItems,prePrefix)===preItems.length;
+          if(preDone)return null;
+          var preKey = isYT ? "ytc" : "s1";
+          return <div onClick={function(){setOpenSec(preKey);}} style={{background:"#a855f708",border:"2px solid #a855f740",borderRadius:12,padding:"10px 14px",marginBottom:10,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
+            <i className="fa-solid fa-bell" style={{color:"#a855f7",fontSize:16}}/>
+            <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:"#a855f7"}}>{preLabel}</div><div style={{fontSize:11,color:"#888"}}>{preSub}</div></div>
+            <i className="fa-solid fa-chevron-down" style={{color:"#a855f7",fontSize:11}}/>
+          </div>;
+        })()}
 
         {/* COLLAPSIBLE SECTIONS (correct order: S1 > Post > YTC > S2 > S3) */}
         {platSections.map(function(sec) { return <div key={sec.key}>{renderCollapsible(sec, platSections)}</div>; })}
