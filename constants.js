@@ -1,17 +1,16 @@
-/* TFS PUBLISH | constants.js | Version 40 | March 16, 2026 */
+/* TFS PUBLISH | constants.js | Version 41 | March 18, 2026 */
 
 var PLATFORMS = [
-  { id: "stories", label: "Stories", icon: "fa-solid fa-book-open", color: "#a855f7", special: true },
   { id: "shared", label: "Shared", icon: "fa-solid fa-share-nodes", color: "#f97316", special: true },
   { id: "editing", label: "Editing", icon: "fa-solid fa-scissors", color: "#2563eb", special: true },
   { id: "tiktok", label: "TikTok", icon: "fa-brands fa-tiktok", color: "#ff0050", by: "Robert", via: "TikTok Studio" },
   { id: "instagram", label: "Instagram", icon: "fa-brands fa-instagram", color: "#E1306C", by: "Robert", via: "Native app" },
   { id: "youtube", label: "YouTube", icon: "fa-brands fa-youtube", color: "#FF0000", by: "Robert", via: "YouTube Studio" },
-  { id: "fb_page", label: "FB Page", icon: "fa-brands fa-facebook", color: "#1877F2", by: "Robert", via: "Meta Business Suite" },
   { id: "fb_personal", label: "FB Pers", icon: "fa-solid fa-user", color: "#4267B2", by: "Robert", via: "Native app" },
-  { id: "fb_groups", label: "Groups", icon: "fa-solid fa-users", color: "#3b5998", by: "Robert", via: "Native app" },
-  { id: "x", label: "X", icon: "fa-brands fa-x-twitter", color: "#444", by: "Robert", via: "Browser" },
-  { id: "threads", label: "Threads", icon: "fa-brands fa-threads", color: "#777", by: "Robert", via: "Browser" },
+  { id: "fb_page", label: "FB Page", icon: "fa-brands fa-facebook", color: "#1877F2", by: "Robert", via: "Meta Business Suite" },
+  { id: "fb_groups", label: "Groups", icon: "fa-solid fa-users", color: "#3b5998", by: "Miza", via: "Native app" },
+  { id: "x", label: "X", icon: "fa-brands fa-x-twitter", color: "#444", by: "Robert", via: "Browser (x.com)" },
+  { id: "reddit", label: "Reddit", icon: "fa-brands fa-reddit-alien", color: "#FF4500", by: "Robert", via: "Browser" },
 ];
 var REAL_PLATFORMS = PLATFORMS.filter(function(p) { return !p.special; });
 
@@ -42,15 +41,14 @@ var ALGO_WORDS = ["sexual content","sex","nudity","nude","porn","gore","graphic 
 var ALGO_SAFE = {"sexual content":"graphic content","sex":"graphic content","nudity":"graphic content","gore":"gratuitous darkness","graphic violence":"gratuitous violence","kill":"delete/erase","die":"get deleted","dies":"gets deleted","died":"got deleted","death":"final bow","dead":"gone","murder":"erasure","drugs":"substances","suicide":"unalive","self-harm":"self-unalive","abuse":"mistreatment","blood":"aftermath","shooting":"incident","weapon":"tool","assault":"confrontation","violence":"conflict"};
 
 var SCHED_NOTES = {
-  stories: "Cannot schedule. Phone only, post natively",
-  tiktok: "Schedule via TikTok Studio (not native app)",
-  instagram: "Schedule via native app",
-  youtube: "Schedule via YouTube Studio",
-  fb_page: "Schedule via Meta Business Suite (desktop). NOT native FB app",
-  fb_personal: "Post via native FB app. Share to Groups once live",
-  fb_groups: "Share from live FB Personal post",
-  x: "Auto-schedule via browser only (not desktop app)",
-  threads: "Auto-schedule via browser only (not desktop app)",
+  tiktok: "TikTok Studio. 10-day limit. Cannot edit after scheduling.",
+  instagram: "Native app. 75-day limit.",
+  youtube: "YouTube Studio (desktop). No limit.",
+  fb_personal: "Native app (mobile). Professional mode required.",
+  fb_page: "Meta Business Suite (desktop).",
+  fb_groups: "Next-day task (Miza). Share from live FB Personal post.",
+  x: "Manual only. No scheduling without X Premium.",
+  reddit: "Manual post via browser.",
 };
 
 var EDITING_CL = {
@@ -70,107 +68,275 @@ var EDITING_CL = {
   ],
 };
 
+/* ========================================
+   POSTING STEP CHECKLISTS (single flow per platform)
+   Each step matches the exact walkthrough from 3/18/26
+   ======================================== */
+
 var CHECKLISTS = {
+  tiktok: [
+    "Upload video to TikTok Studio",
+    "Add trending music (adjust to 3% or lower if original music on video)",
+    "Add stickers/polls",
+    "Verify on-screen indexing text visible (evergreen + topic phrases)",
+    "Add 'Add Yours' sticker",
+    "Add description (caption)",
+    "Verify CTA (one per post, matches assigned type)",
+    "Verify hashtags (4 total: 1 anchor + 1-2 genre + 0-1 comp)",
+    "Check for better 'Add Yours' after description populates options",
+    "More Options ON: comments, reuse, English, similar products, high quality, save to device",
+    "More Options OFF: AI generated content, watermark, audience controls",
+    "Everyone can view",
+    "Schedule or post now (10-day limit, cannot edit after scheduling)"
+  ],
+  instagram: [
+    "Native app > + > Reel",
+    "Upload video",
+    "Add trending music (auto-mutes original audio; 3% if original music)",
+    "Add stickers/polls",
+    "Verify on-screen indexing text visible",
+    "Add description",
+    "Verify hashtags (3-5: #thefirststone + 4 discovery)",
+    "Verify CTA",
+    "Link Reel (if relevant, 2+ Reels published)",
+    "Add Prompt (pins question to top of comments)",
+    "Audience: everyone",
+    "Sharing: Threads OFF, Facebook OFF, Facebook Stories ON",
+    "Schedule Reel",
+    "More Options ON: highest quality, closed captions, translate captions, allow download",
+    "More Options OFF: don't let others use, hide likes, hide shares; commenting ON"
+  ],
+  youtube: [
+    "YouTube Studio (desktop)",
+    "Upload video (auto-detected as Short if 9:16 and under 3 min)",
+    "Add title",
+    "Verify visibility is Public (YT Studio sometimes flips to Private)",
+    "Schedule (date and time)",
+    "Verify 'Not made for kids'",
+    "Add description + hashtags (2-3 in description)",
+    "Verify CTA",
+    "Link Video (if relevant)",
+    "Add to playlist (if relevant)",
+    "Paid promotion: NO",
+    "Collaborations: comments ON, show likes ON, shorts remixing ON",
+    "Altered content: NO",
+    "Category: People and Blogs",
+    "Verify tags (30 universal tags auto-applied via upload defaults, add 1-2 topic-specific)",
+    "License: Standard YouTube License, allow embedding",
+    "Upload"
+  ],
+  yt_community: [
+    "YouTube native app > channel > view channel > Community tab",
+    "Make poll",
+    "Write description (use main post description as base)",
+    "CTA at top of post",
+    "Add divider between description and hashtags/promo",
+    "Add hashtags (they work in community posts)",
+    "Add poll answers/options",
+    "Post"
+  ],
+  fb_personal: [
+    "Verify Instagram Story 1 cross-posted successfully",
+    "Native app",
+    "Upload video",
+    "Add trending music (3% if original music)",
+    "Add description (casual Robert voice, same as FB Groups/YT Community)",
+    "Add title (match YouTube Shorts title)",
+    "Schedule first (greys out some options)",
+    "Share to your story: ON",
+    "Add to playlist (if relevant)",
+    "Public",
+    "Closed captions: ON",
+    "Schedule"
+  ],
+  fb_page: [
+    "Meta Business Suite",
+    "Select Reel",
+    "Upload video",
+    "Add music",
+    "Add tags/stickers",
+    "Add description",
+    "Schedule"
+  ],
+  fb_groups: [],
+  x: [
+    "Desktop (x.com in browser)",
+    "Use screenshot from main video (NOT the video itself)",
+    "Use main post caption",
+    "Add image description (alt text, generated)",
+    "Remove promo line",
+    "Reduce to exactly 2 hashtags",
+    "Post now (no scheduling without X Premium)"
+  ],
+  reddit: [],
+};
+
+/* ========================================
+   STORY CHECKLISTS (per platform, per story type)
+   Story 1 = pre-post (before scheduled post goes live)
+   Story 2 = after main post goes live
+   Story 3 = personal angle (pre-recorded Canva or selfie)
+   ======================================== */
+
+var STORY_CHECKLISTS = {
   tiktok: {
-    pre: ["Upload 1080x1920 9:16 MP4 H.264","Add trending sound (search in TikTok Studio)","On-screen text overlay keywords (first 2-3 sec)","Stickers: Add Yours / interactive (if applicable)","Cover image (once 9-12 posts)"],
-    caption: ["2-3 keywords in caption","4 hashtags: 1 anchor + 1-2 genre + 0-1 comp","ONE CTA only"],
-    settings: ["Everyone, Comments/Duets/Stitches ON","Allow downloads ON","AI disclosure toggle (if applicable)","Schedule or Post (trending = post now)"],
-    post: ["Comments within 1 hour","Pin best (max 3)","Reminder: analytics 24h"],
-    stories: ["Story 1: upload Canva pre-build (1080x1920), add stickers natively","Add poll or question sticker","Main post live: share to Story (Story 2)","Add text overlay to shared Story","Story 3: upload Canva pre-build (1080x1920), add stickers natively"]
+    s1: [
+      "Make in Canva (screenshot from video without text overlay)",
+      "Upload via regular TikTok app",
+      "Add trending music at 3% volume",
+      "Add poll/stickers (edit answers if needed)",
+      "Add mention sticker (@worldofexousia)",
+      "Add 'Add Yours' sticker (if relevant)",
+      "Post"
+    ],
+    s2: [
+      "Go to live posted video",
+      "Share arrow > 'Add to Story'",
+      "Add text sticker with context",
+      "Add trending music at 3% volume",
+      "Post"
+    ],
+    s3: [
+      "Upload pre-made Canva video",
+      "Add trending music at 3% volume",
+      "Add stickers if appropriate",
+      "Add mention sticker (@worldofexousia)",
+      "Post"
+    ]
   },
   instagram: {
-    pre: ["Upload without watermark","Safe zone: keep text inside 1080x1420","Add IG trending audio (auto-mutes original audio)","On-screen text overlay keywords (first 2-3 sec)","Interactive stickers (if applicable)","Captions (cc) ON","Download reel to phone before posting","Edit cover image 4:5"],
-    caption: ["IG caption (not TikTok copy)","2-3 keywords in caption","3-5 hashtags: #thefirststone + 4","ONE CTA","Poll button (optional: choice content)","Prompt button (pin CTA to comments)"],
-    settings: ["Everyone","Threads cross-post OFF","Facebook Reels/Posts cross-post OFF","Facebook Stories ON (once connected ~3/17)","Your Story ON","Upload at Highest Quality ON","Translate Closed Captions ON","Allow Downloads ON","Allow Reel as Template ON"],
-    post: ["Comments within 1 hour","Pin best (up to 3)","Insights 24h"],
-    stories: ["Story 1: upload Canva pre-build (1080x1920), add stickers natively","Add poll or question sticker","Main post live: share to Story (Story 2)","Add text overlay to shared Story","Story 3: upload Canva pre-build (1080x1920), add stickers natively"]
-  },
-  youtube: {
-    pre: ["Upload without watermark, max 60 sec, 9:16 MP4 H.264","Add trending audio"],
-    caption: ["Title: keyword-rich (100 char limit)","Desc: add from DESKTOP after upload","2-3 discovery hashtags (paste into description, no #Shorts)","Tags: 5-10 keyword tags (Show More > Attributes)"],
-    settings: ["Not made for kids (COPPA)","Remixing ON","Likes ON"],
-    post: ["DESKTOP: Add Description","DESKTOP: Add Related Video (need 2+ videos)","Post Community Post (caption + image)","Comments within 1 hour","Analytics 24h"]
-  },
-  fb_page: {
-    pre: ["Upload via Meta Business Suite (desktop, not native FB app)","1080x1920 9:16 MP4 H.264","Add trending audio for Reels"],
-    caption: ["Page caption (polished brand voice)","0-1 hashtags","ONE CTA","NO links in caption (comment only)"],
-    settings: ["Reel title + tags required","Captions ON"],
-    post: ["Link as comment ONLY when tied to faction quiz (3-4x/week)","Keep link comment conversational","Comments within 1 hour","Insights 24h"]
+    s1: [
+      "Upload pre-made Canva image",
+      "Add stickers/polls (edit answers as needed)",
+      "Add trending music at 3% volume",
+      "Add caption (story caption field)",
+      "Facebook connected stories: ON",
+      "Post"
+    ],
+    s2: [
+      "Go to live Reel",
+      "Share arrow > 'Add to Story'",
+      "Add text sticker with context",
+      "Add trending music at 3% volume",
+      "Fill story caption field",
+      "Facebook connected stories: ON",
+      "Post"
+    ],
+    s3: [
+      "Upload pre-made Canva video",
+      "Add trending music at 3% volume",
+      "Add stickers if appropriate",
+      "Add mention sticker (@worldofexousia)",
+      "Fill story caption field",
+      "Facebook connected stories: ON",
+      "Post"
+    ]
   },
   fb_personal: {
-    pre: ["Post via native FB app","Upload video or text post"],
-    caption: ["Casual Robert voice","No hashtags, no CTAs","Links in comment only"],
-    settings: [],
-    post: ["Respond to comments","Share to Groups (see Groups tab)"]
+    s1: [
+      "Verify cross-post from Instagram arrived. If not, upload manually."
+    ],
+    s2: [
+      "Go to live posted video",
+      "Share to story",
+      "Add text sticker with context",
+      "Add trending music at 3% volume",
+      "Post",
+      "FB Groups next-day sharing begins (Miza task, next morning)"
+    ],
+    s3: [
+      "Upload pre-made Canva video",
+      "Add trending music at 3% volume",
+      "Add stickers if appropriate",
+      "Post"
+    ]
   },
-  fb_groups: {
-    pre: ["Go to LIVE personal post","Tap Share > Share to a Group"],
-    caption: [],
-    settings: ["~9 groups per batch, 5-10 min apart","Max 20-25 groups per day"],
-    post: ["Document groups shared","Note moderation queues","Rotate group list"]
+  fb_page: {
+    s1: [
+      "Meta Business Suite > Stories",
+      "Upload picture",
+      "Add music",
+      "Delete music sticker (music still plays)",
+      "Add sticker (polls NOT available; use text sticker with question)"
+    ],
+    s2: [
+      "Share live Reel to Page story via Meta Business Suite",
+      "Add text sticker with context",
+      "Add trending music at 3% volume"
+    ],
+    s3: [
+      "Upload pre-made Canva video via Meta Business Suite",
+      "Add trending music at 3% volume",
+      "Add text sticker if appropriate"
+    ]
   },
   x: {
-    pre: ["Upload natively via browser","9:16 MP4 H.264, no watermark","No trending audio (not supported)"],
-    caption: ["X caption (280 chars max)","2 hashtags exactly","ONE CTA"],
-    settings: [],
-    post: ["Respond to replies","Repost/quote if traction"]
+    s1: [
+      "Post Story 1 content as standalone regular post",
+      "Use screenshot or Canva image",
+      "Write standalone copy (must work on its own)",
+      "Exactly 2 hashtags",
+      "Post"
+    ]
   },
-  threads: {
-    pre: ["Post natively via browser","Video: 9:16 MP4 (if video post)","No trending audio (not supported)","Post Stories 1 and 3 as regular Threads posts"],
-    caption: ["Threads caption (500 chars max)","Cold reader context (no prior awareness)","Topic tag as hashtag (e.g. #EpicFantasy)","Strong prompt/question to drive replies","ONE CTA"],
-    settings: [],
-    post: ["Engage with replies","Follow topic communities"]
-  },
+  youtube: {},
+  fb_groups: {},
+  reddit: {},
 };
+
+/* ========================================
+   TEMPLATE FIELDS (copy fields per platform)
+   ======================================== */
 
 var TEMPLATES = {
   tiktok: [
-    { key: "copy", label: "Caption", hint: "100-300ch, 4000 max. ONE CTA in caption.", max: 4000, multi: true },
-    { key: "hashtags", label: "Hashtags", hint: "4 total: 1 anchor + 1-2 genre + 0-1 comp. No branded first 30 days" },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
+    { key: "copy", label: "Caption", hint: "100-300ch, 4000 max. ONE CTA.", max: 4000, multi: true },
+    { key: "hashtags", label: "Hashtags", hint: "4 total: 1 anchor + 1-2 genre + 0-1 comp" }
   ],
   instagram: [
-    { key: "copy", label: "Caption", hint: "125-200ch. Google indexes. ONE CTA (link in bio OK).", max: 2200, multi: true },
+    { key: "copy", label: "Caption", hint: "125-200ch. Google indexes. ONE CTA.", max: 2200, multi: true },
     { key: "hashtags", label: "Hashtags", hint: "5 max: #thefirststone + 4" },
-    { key: "prompt", label: "Comment Prompt", hint: "Pinned question at top of comments" },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
+    { key: "prompt", label: "Comment Prompt", hint: "Pinned question at top of comments" }
   ],
   youtube: [
     { key: "title", label: "Title", hint: "100ch limit. Title Case.", max: 100 },
-    { key: "description", label: "Description", hint: "Add from desktop. Hashtags go here, count toward chars.", multi: true },
-    { key: "hashtags", label: "Hashtags", hint: "2-3 discovery hashtags, no #Shorts" },
-    { key: "tags", label: "Tags", hint: "5-10 keyword tags (Show More > Attributes)" },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
+    { key: "description", label: "Description", hint: "Add from desktop. Hashtags go here.", multi: true },
+    { key: "hashtags", label: "Hashtags", hint: "2-3 discovery, no #Shorts" },
+    { key: "tags", label: "Tags", hint: "5-10 keyword tags (Show More > Attributes)" }
+  ],
+  fb_personal: [
+    { key: "title", label: "Title", hint: "Match YouTube Shorts title" },
+    { key: "copy", label: "Caption", hint: "Casual Robert. No hashtags/CTAs.", multi: true }
   ],
   fb_page: [
     { key: "copy", label: "Caption", hint: "Polished brand voice. Links in comment only.", multi: true },
     { key: "reel_title", label: "Reel Title", hint: "Required" },
-    { key: "hashtags", label: "Hashtags", hint: "0-1" },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
-  ],
-  fb_personal: [
-    { key: "title", label: "Title", hint: "Match YouTube Shorts title" },
-    { key: "copy", label: "Caption", hint: "Casual Robert. No hashtags/CTAs.", multi: true },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
+    { key: "hashtags", label: "Hashtags", hint: "0-1" }
   ],
   fb_groups: [],
   x: [
     { key: "copy", label: "Caption", hint: "280 max. Sentence case.", max: 280, multi: true },
     { key: "hashtags", label: "Hashtags", hint: "2 exactly" },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
+    { key: "screenshot", label: "Screenshot", hint: "Screenshot from main video (NOT video). Image post." },
+    { key: "altText", label: "Alt Text", hint: "Image description for accessibility" }
   ],
-  threads: [
-    { key: "copy", label: "Caption", hint: "500 max. Cold reader context. Strong prompt/question.", max: 500, multi: true },
-    { key: "hashtags", label: "Topic Tag", hint: "0-1 topic tag as hashtag" },
-    { key: "keywords", label: "Keywords", hint: "On-screen text overlay block for indexing" },
-    { key: "relatedVideo", label: "Related Video", hint: "Which content piece connects to this one" }
+  reddit: [
+    { key: "title", label: "Title", hint: "Post title" },
+    { key: "copy", label: "Body", hint: "Post text. Follow subreddit rules.", multi: true }
   ],
+};
+
+var YT_UNIVERSAL_TAGS = "the first stone, world of exousia, Robert Biehn, fantasy books, ya books, ya fantasy, epic fantasy, dystopian books, scifi books, dark fantasy, debut author, writing life, worldbuilding, found family, sibling bonds, morally grey, elemental powers, regime oppression, shadow and bone, an ember in the ashes, red rising, booktok, fantasy book recommendations, books like shadow and bone, fantasy series, hunger games, fourth wing, mistborn, children of blood and bone, ya lit";
+
+var INDEX_EVERGREEN_DEFAULT = "YA dystopian fantasy author";
+
+var FB_GROUPS_PROTOCOL = {
+  source: "Share Robert's personal profile post (NOT the Page post)",
+  timing: "Morning after each posting day (Tue/Thu/Sat for Mon/Wed/Fri posts)",
+  pace: "6-7 groups per hour, max 20 groups per day",
+  total: "30 groups total, rotate which go first",
+  tracking: "Google Sheet with 'Last Shared Date' column",
+  safety: "If CAPTCHAs appear, stop immediately"
 };
 
 var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -183,9 +349,9 @@ var M_ST_L = { no_media: "No Media", raw_uploaded: "Uploaded", in_editing: "Edit
 
 var MAX_DAYS = 65;
 
-var PLAT_CHAR_LIMITS = { tiktok: 4000, instagram: 2200, youtube: 5000, fb_page: 63206, fb_personal: 63206, x: 280, threads: 500 };
-var PLAT_HASHTAG_LIMITS = { tiktok: 4, instagram: 5, youtube: 3, fb_page: 1, fb_personal: 0, fb_groups: 0, x: 2, threads: 1 };
-var TRENDING_PLATFORMS = ["tiktok","instagram","youtube","fb_page"];
+var PLAT_CHAR_LIMITS = { tiktok: 4000, instagram: 2200, youtube: 5000, fb_page: 63206, fb_personal: 63206, x: 280, reddit: 40000 };
+var PLAT_HASHTAG_LIMITS = { tiktok: 4, instagram: 5, youtube: 3, fb_page: 1, fb_personal: 0, fb_groups: 0, x: 2, reddit: 0 };
+var TRENDING_PLATFORMS = ["tiktok","instagram","youtube","fb_page","fb_personal"];
 
 var XP_VALUES = { shared: 20, platform: 50, comment: 30, story: 20, group: 2 };
 var COMP_TAGS = ["#grishaverse","#shadowandbone","#redrising","#childrenofbloodandbone","#anemberintheashes"];

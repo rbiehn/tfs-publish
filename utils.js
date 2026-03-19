@@ -1,4 +1,4 @@
-/* TFS PUBLISH | utils.js | Version 40 | March 16, 2026 */
+/* TFS PUBLISH | utils.js | Version 41 | March 18, 2026 */
 
 var SUPABASE_URL = "https://fiyamhxmszuxfpnfnuwz.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpeWFtaHhtc3p1eGZwbmZudXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDg3NjMsImV4cCI6MjA4ODgyNDc2M30.cbQvMcCJnhon4qQ-C9uViubQyKapfBpVpA3Q8tU4KIM";
@@ -77,18 +77,18 @@ function isImgUrl(u) {
     l.indexOf("supabase.co/storage") !== -1;
 }
 
-// ---- MARKDOWN DAY IMPORT/EXPORT ----
+// ---- MARKDOWN IMPORT/EXPORT ----
 
 var MD_SECTION_MAP = {
   "shared": "shared",
   "tiktok": "tiktok",
   "instagram": "instagram",
   "youtube": "youtube",
-  "fb page": "fb_page",
   "fb personal": "fb_personal",
+  "fb page": "fb_page",
   "fb groups": "fb_groups",
   "x": "x",
-  "threads": "threads"
+  "reddit": "reddit"
 };
 
 var MD_SECTION_LABELS = {
@@ -96,10 +96,10 @@ var MD_SECTION_LABELS = {
   "tiktok": "TikTok",
   "instagram": "Instagram",
   "youtube": "YouTube",
-  "fb_page": "FB Page",
   "fb_personal": "FB Personal",
+  "fb_page": "FB Page",
   "x": "X",
-  "threads": "Threads"
+  "reddit": "Reddit"
 };
 
 var MD_KEY_MAP = {
@@ -115,7 +115,8 @@ var MD_KEY_MAP = {
   "related video": "relatedVideo",
   "content type": "_contentType",
   "salesy": "_salesy",
-  "post time": "_postTime"
+  "post time": "_postTime",
+  "body": "copy"
 };
 
 var MD_CONTENT_TYPE_MAP = {
@@ -142,7 +143,7 @@ var MD_SALESY_MAP = {
 
 function generateBlankMd(dayNum) {
   var lines = [];
-  lines.push("# Day " + dayNum + ": [Topic Title]");
+  lines.push("# " + dayNum + ": [Video Title]");
   lines.push("Content Type: [Personal Story / World / Lore / Behind the Scenes / Book Pitch / Writing Craft / Community / Fan / Collab / Feature]");
   lines.push("Salesy: [No Mention / Soft / Full]");
   lines.push("Post Time: [HH:MM]");
@@ -180,19 +181,19 @@ function generateBlankMd(dayNum) {
   lines.push("Tags: [5-10 keyword tags, comma-separated]");
   lines.push("Related Video:");
   lines.push("");
+  lines.push("## FB Personal");
+  lines.push("Title: [Match YouTube Shorts title]");
+  lines.push("Caption:");
+  lines.push("[Casual Robert. No hashtags, no CTAs.]");
+  lines.push("");
+  lines.push("Related Video:");
+  lines.push("");
   lines.push("## FB Page");
   lines.push("Caption:");
   lines.push("[Polished brand voice. Links in comment only.]");
   lines.push("");
   lines.push("Reel Title: [Required]");
   lines.push("Hashtags: [0-1]");
-  lines.push("Related Video:");
-  lines.push("");
-  lines.push("## FB Personal");
-  lines.push("Title: [Match YouTube Shorts title]");
-  lines.push("Caption:");
-  lines.push("[Casual Robert. No hashtags, no CTAs.]");
-  lines.push("");
   lines.push("Related Video:");
   lines.push("");
   lines.push("## X");
@@ -202,13 +203,6 @@ function generateBlankMd(dayNum) {
   lines.push("Hashtags: [2 exactly]");
   lines.push("Related Video:");
   lines.push("");
-  lines.push("## Threads");
-  lines.push("Caption:");
-  lines.push("[500ch max. Cold reader context. Strong question.]");
-  lines.push("");
-  lines.push("Hashtags: [0-1 topic tag]");
-  lines.push("Related Video:");
-  lines.push("");
   return lines.join("\n");
 }
 
@@ -216,7 +210,7 @@ function exportDayMd(dayNum, dc) {
   if (!dc) return generateBlankMd(dayNum);
   var sh = dc.shared || {};
   var lines = [];
-  lines.push("# Day " + dayNum + ": " + (dc.topicTitle || "[Topic Title]"));
+  lines.push("# " + dayNum + ": " + (dc.topicTitle || "[Video Title]"));
   var ctObj = CONTENT_TYPES.find(function(c) { return c.id === (dc.contentType || "none"); });
   lines.push("Content Type: " + (ctObj && ctObj.id !== "none" ? ctObj.label : ""));
   var slObj = SALESY_LEVELS.find(function(s) { return s.id === (dc.salesy || "none"); });
@@ -232,7 +226,7 @@ function exportDayMd(dayNum, dc) {
   lines.push("Prompt: " + (sh.prompt || ""));
   lines.push("Music: " + (sh.music || ""));
   lines.push("");
-  var platOrder = ["tiktok", "instagram", "youtube", "fb_page", "fb_personal", "x", "threads"];
+  var platOrder = ["tiktok", "instagram", "youtube", "fb_personal", "fb_page", "x", "reddit"];
   platOrder.forEach(function(pid) {
     var tpl = TEMPLATES[pid];
     if (!tpl || !tpl.length) return;
@@ -296,7 +290,8 @@ function parseDayMd(mdText) {
 
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
-    var h1 = line.match(/^#\s+Day\s+(\d+)\s*:\s*(.*)/i);
+    // Match both "# Day 5: Title" (legacy) and "# 5: Title" (v41)
+    var h1 = line.match(/^#\s+(?:Day\s+)?(\d+)\s*:\s*(.*)/i);
     if (h1) {
       flushKey();
       result.dayNum = parseInt(h1[1]);
@@ -363,3 +358,5 @@ function mergeDayMd(parsed, existingContent) {
 
   return dc;
 }
+
+
