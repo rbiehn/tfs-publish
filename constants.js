@@ -1,4 +1,4 @@
-/* TFS PUBLISH | constants.js | Version 43 | March 19, 2026 */
+/* TFS PUBLISH | constants.js | Version 45 | March 19, 2026 */
 
 var PLATFORMS = [
   { id: "shared", label: "Shared", icon: "fa-solid fa-share-nodes", color: "#f97316", special: true },
@@ -326,7 +326,7 @@ var TEMPLATES = {
   ],
 };
 
-var YT_UNIVERSAL_TAGS = "the first stone, world of exousia, Robert Biehn, fantasy books, ya books, ya fantasy, epic fantasy, dystopian books, scifi books, dark fantasy, debut author, writing life, worldbuilding, found family, sibling bonds, morally grey, elemental powers, regime oppression, shadow and bone, an ember in the ashes, red rising, booktok, fantasy book recommendations, books like shadow and bone, fantasy series, hunger games, fourth wing, mistborn, children of blood and bone, ya lit";
+var YT_UNIVERSAL_TAGS = "YA fantasy, YA dystopian fantasy, debut author, epic fantasy, fantasy worldbuilding, fantasy books, booktok, writing process, author life, Shadow and Bone, An Ember in the Ashes, Children of Blood and Bone, Red Rising, Grishaverse, dark fantasy, debut YA fantasy novel, fantasy reader, book recommendations, fantasy TBR, morally gray characters, dystopian fiction, Leigh Bardugo, Sabaa Tahir, Tomi Adeyemi, Pierce Brown, magic";
 
 var INDEX_EVERGREEN_DEFAULT = "YA dystopian fantasy author";
 

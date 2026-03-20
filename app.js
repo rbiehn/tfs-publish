@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 43 | March 19, 2026 */
+/* TFS PUBLISH | app.js | Version 45 | March 19, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -114,7 +114,7 @@ function App() {
   var videoTitle = (dc && dc.topicTitle) || "";
   var schedDate = vd.date ? fmtD(vd.date) : "Unscheduled";
 
-  // ---- PROGRESS (v43: flat checklist) ----
+  // ---- PROGRESS (v45: flat checklist) ----
   var countProgress = function(d, pid) {
     var k = "d" + d + "_" + pid;
     var ck = checks[k] || {};
@@ -152,7 +152,7 @@ function App() {
   var editCk = checks[editCkKey] || {};
   var toggleEditCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[editCkKey] = Object.assign({}, o[editCkKey] || {}); o[editCkKey][id] = !o[editCkKey][id]; return o; }); };
 
-  // ---- CHECKLIST HELPERS (v43) ----
+  // ---- CHECKLIST HELPERS (v45) ----
   var toggleCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); o[pK][id] = !o[pK][id]; return o; }); };
   var resetCk = function() { setCk(function(p) { var o = Object.assign({}, p); o[pK] = {}; return o; }); flash("Checklist reset"); };
   var checkSection = function(prefix, items) { if (!items || !items.length) return; setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); var allDone = true; items.forEach(function(_, i) { if (!o[pK][prefix + i]) allDone = false; }); items.forEach(function(_, i) { o[pK][prefix + i] = !allDone; }); return o; }); };
@@ -442,7 +442,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v43 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v45 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -671,6 +671,7 @@ function App() {
             if (shared.prompt) { setFld(day, "instagram", "prompt", shared.prompt); }
             if (shared.music) TRENDING_PLATFORMS.forEach(function(pid) { setFld(day, pid, "musicNote", shared.music); });
             allTargets.forEach(function(pid) { setFld(day, pid, "keywords", indexVal.trim()); });
+            setFld(day, "youtube", "tags", YT_UNIVERSAL_TAGS);
             flash("Pushed to all platforms");
           };
           return <div style={{marginBottom:8}}>
