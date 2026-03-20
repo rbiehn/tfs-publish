@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 42 | March 19, 2026 */
+/* TFS PUBLISH | app.js | Version 43 | March 19, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -114,7 +114,7 @@ function App() {
   var videoTitle = (dc && dc.topicTitle) || "";
   var schedDate = vd.date ? fmtD(vd.date) : "Unscheduled";
 
-  // ---- PROGRESS (v42: flat checklist) ----
+  // ---- PROGRESS (v43: flat checklist) ----
   var countProgress = function(d, pid) {
     var k = "d" + d + "_" + pid;
     var ck = checks[k] || {};
@@ -152,7 +152,7 @@ function App() {
   var editCk = checks[editCkKey] || {};
   var toggleEditCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[editCkKey] = Object.assign({}, o[editCkKey] || {}); o[editCkKey][id] = !o[editCkKey][id]; return o; }); };
 
-  // ---- CHECKLIST HELPERS (v42) ----
+  // ---- CHECKLIST HELPERS (v43) ----
   var toggleCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); o[pK][id] = !o[pK][id]; return o; }); };
   var resetCk = function() { setCk(function(p) { var o = Object.assign({}, p); o[pK] = {}; return o; }); flash("Checklist reset"); };
   var checkSection = function(prefix, items) { if (!items || !items.length) return; setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); var allDone = true; items.forEach(function(_, i) { if (!o[pK][prefix + i]) allDone = false; }); items.forEach(function(_, i) { o[pK][prefix + i] = !allDone; }); return o; }); };
@@ -190,7 +190,7 @@ function App() {
   // ---- DAY HELPERS ----
   var dayPct = function(d) { var t = 0, c2 = 0; REAL_PLATFORMS.forEach(function(p) { var pr = countProgress(d, p.id); t += pr.total; c2 += pr.done; }); return t ? Math.round(c2 / t * 100) : 0; };
   var dayAllDone = function(d) { var all = true; REAL_PLATFORMS.forEach(function(p) { if ((statuses["d" + d + "_" + p.id] || "not_started") !== "done") all = false; }); return all; };
-  var getCopyDiff = function(d) { var dc2 = content[d]; if (!dc2 || !dc2.shared || !dc2.shared.caption) return []; var base = dc2.shared.caption; var diffs = []; REAL_PLATFORMS.forEach(function(rp) { var pcc = dc2.platforms && dc2.platforms[rp.id]; var platCopy = (pcc && pcc.copy) || ""; if (!platCopy) return; if (platCopy === base) diffs.push({ plat: rp, status: "match" }); else diffs.push({ plat: rp, status: "edited", copy: platCopy }); }); return diffs; };
+  var getCopyDiff = function(d) { var dc2 = content[d]; if (!dc2 || !dc2.shared || !dc2.shared.caption) return []; var base = dc2.shared.caption; var diffs = []; REAL_PLATFORMS.forEach(function(rp) { var pcc = dc2.platforms && dc2.platforms[rp.id]; var platCopy = (pcc && (rp.id === "youtube" ? pcc.description : pcc.copy)) || ""; if (!platCopy) return; if (platCopy === base) diffs.push({ plat: rp, status: "match" }); else diffs.push({ plat: rp, status: "edited", copy: platCopy }); }); return diffs; };
   var titleFor = function(d) { return (content[d] && content[d].topicTitle) || "#" + d; };
 
   // ---- TIMER ----
@@ -442,7 +442,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v42 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v43 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -491,7 +491,7 @@ function App() {
   // CROSS-VIEW
   // ==================================================================
   if (view === "crossview") { return (<div className="tfs-app" style={S.ctn}><div style={S.topBar}><button onClick={function(){goBack();}} style={S.back}><i className="fa-solid fa-arrow-left" style={{fontSize:13,marginRight:5}}/>Back</button><span style={S.topT}>{videoTitle || "#" + day} CROSS</span><div style={{width:50}}/></div>
-    <div style={{padding:"18px 20px 80px"}}>{REAL_PLATFORMS.map(function(p){var pcc=content[day]&&content[day].platforms&&content[day].platforms[p.id],cp=(pcc&&pcc.copy)||"",fl=scanAlgo(cp);return(<div key={p.id} style={{background:"#fff",border:"1px solid #eeeef2",borderRadius:14,padding:12,marginBottom:8,boxShadow:"0 1px 4px #00000006"}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><i className={p.icon} style={{fontSize:16,color:p.color}}/><span style={{fontSize:14,fontWeight:700,color:"#444",flex:1}}>{p.label}</span><span style={{fontSize:11,color:"#aaa"}}>{cp.length}ch</span><button onClick={function(){setPlat(p.id);goTo("publish");}} style={{background:"#f0f0f4",border:"1px solid #d4d4db",borderRadius:8,padding:"6px 10px",fontSize:12,color:"#888",cursor:"pointer"}}>Edit</button><CopyBtn text={cp}/></div><div style={{fontSize:13,color:"#777",whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{cp||"(empty)"}</div>{fl.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginTop:5}}>{fl.map(function(f,i){return <span key={i} style={{background:"#fef2f2",color:"#dc2626",padding:"2px 6px",borderRadius:4,fontSize:11}}>{f.word}</span>;})}</div>}</div>);})}</div>
+    <div style={{padding:"18px 20px 80px"}}>{REAL_PLATFORMS.map(function(p){var pcc=content[day]&&content[day].platforms&&content[day].platforms[p.id],cp=(pcc&&(p.id==="youtube"?pcc.description:pcc.copy))||"",fl=scanAlgo(cp);return(<div key={p.id} style={{background:"#fff",border:"1px solid #eeeef2",borderRadius:14,padding:12,marginBottom:8,boxShadow:"0 1px 4px #00000006"}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><i className={p.icon} style={{fontSize:16,color:p.color}}/><span style={{fontSize:14,fontWeight:700,color:"#444",flex:1}}>{p.label}</span><span style={{fontSize:11,color:"#aaa"}}>{cp.length}ch</span><button onClick={function(){setPlat(p.id);goTo("publish");}} style={{background:"#f0f0f4",border:"1px solid #d4d4db",borderRadius:8,padding:"6px 10px",fontSize:12,color:"#888",cursor:"pointer"}}>Edit</button><CopyBtn text={cp}/></div><div style={{fontSize:13,color:"#777",whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{cp||"(empty)"}</div>{fl.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginTop:5}}>{fl.map(function(f,i){return <span key={i} style={{background:"#fef2f2",color:"#dc2626",padding:"2px 6px",borderRadius:4,fontSize:11}}>{f.word}</span>;})}</div>}</div>);})}</div>
   </div>);}
 
   // ==================================================================
@@ -662,7 +662,11 @@ function App() {
           var doPushAll = function() {
             var pushTargets = ["tiktok","instagram","youtube","fb_page","x"];
             var allTargets = ["tiktok","instagram","youtube","fb_page","fb_personal","x"];
-            if (shared.caption) pushTargets.forEach(function(pid) { setFld(day, pid, "copy", shared.caption); });
+            if (shared.caption) pushTargets.forEach(function(pid) {
+              // YouTube uses 'description', all others use 'copy'
+              var fieldKey = pid === "youtube" ? "description" : "copy";
+              setFld(day, pid, fieldKey, shared.caption);
+            });
             if (shared.hashtags) pushTargets.forEach(function(pid) { setFld(day, pid, "hashtags", shared.hashtags); });
             if (shared.prompt) { setFld(day, "instagram", "prompt", shared.prompt); }
             if (shared.music) TRENDING_PLATFORMS.forEach(function(pid) { setFld(day, pid, "musicNote", shared.music); });
@@ -734,7 +738,7 @@ function App() {
       {/* ============================================ */}
       {!isSpecial&&plat!=="fb_groups"&&(function(){
         var platSections = getSections(plat);
-        var copyCaption = (pc && pc.copy) || "";
+        var copyCaption = (pc && (plat === "youtube" ? pc.description : pc.copy)) || "";
         var copyHashtags = (pc && pc.hashtags) || "";
         return <div>
         {/* STATUS BAR */}
@@ -802,7 +806,7 @@ function App() {
 
         {/* FLOATING COPY BAR */}
         {(copyCaption||copyHashtags)&&<div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:150,display:"flex",justifyContent:"center"}}><div style={{display:"flex",gap:6,padding:"10px 16px 14px",background:"#ffffffee",borderTop:"1px solid #eeeef2",backdropFilter:"blur(12px)",maxWidth:880,width:"100%",justifyContent:"center"}}>
-          {copyCaption&&<button onClick={function(){navigator.clipboard.writeText(copyCaption).then(function(){flash("Caption copied");});}} style={{background:aPlat?aPlat.color:"#f97316",border:"none",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",flex:1,maxWidth:200}}><i className="fa-solid fa-copy" style={{marginRight:5}}/>Caption</button>}
+          {copyCaption&&<button onClick={function(){navigator.clipboard.writeText(copyCaption).then(function(){flash((plat==="youtube"?"Description":"Caption")+" copied");});}} style={{background:aPlat?aPlat.color:"#f97316",border:"none",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",flex:1,maxWidth:200}}><i className="fa-solid fa-copy" style={{marginRight:5}}/>{plat==="youtube"?"Desc":"Caption"}</button>}
           {copyHashtags&&<button onClick={function(){navigator.clipboard.writeText(copyHashtags).then(function(){flash("Hashtags copied");});}} style={{background:"#2563eb",border:"none",borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer",flex:1,maxWidth:200}}><i className="fa-solid fa-hashtag" style={{marginRight:5}}/>Tags</button>}
           {pc&&pc.title&&<button onClick={function(){navigator.clipboard.writeText(pc.title).then(function(){flash("Title copied");});}} style={{background:"#666",border:"none",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:700,color:"#fff",cursor:"pointer"}}><i className="fa-solid fa-heading" style={{marginRight:5}}/>Title</button>}
         </div></div>}

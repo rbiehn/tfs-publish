@@ -1,4 +1,4 @@
-/* TFS PUBLISH | utils.js | Version 42 | March 19, 2026 */
+/* TFS PUBLISH | utils.js | Version 43 | March 19, 2026 */
 
 var SUPABASE_URL = "https://fiyamhxmszuxfpnfnuwz.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpeWFtaHhtc3p1eGZwbmZudXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDg3NjMsImV4cCI6MjA4ODgyNDc2M30.cbQvMcCJnhon4qQ-C9uViubQyKapfBpVpA3Q8tU4KIM";
