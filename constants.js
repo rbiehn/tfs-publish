@@ -1,4 +1,4 @@
-/* TFS PUBLISH | constants.js | Version 45 | March 19, 2026 */
+/* TFS PUBLISH | constants.js | Version 46 | March 19, 2026 */
 
 var PLATFORMS = [
   { id: "shared", label: "Shared", icon: "fa-solid fa-share-nodes", color: "#f97316", special: true },
@@ -301,8 +301,7 @@ var TEMPLATES = {
   youtube: [
     { key: "title", label: "Title", hint: "100ch limit. Title Case.", max: 100 },
     { key: "description", label: "Description", hint: "Add from desktop. Hashtags go here.", multi: true },
-    { key: "hashtags", label: "Hashtags", hint: "2-3 discovery, no #Shorts" },
-    { key: "tags", label: "Tags", hint: "5-10 keyword tags (Show More > Attributes)" }
+    { key: "hashtags", label: "Hashtags", hint: "2-3 discovery, no #Shorts" }
   ],
   fb_personal: [
     { key: "title", label: "Title", hint: "Match YouTube Shorts title" },

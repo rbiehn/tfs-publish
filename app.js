@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 45 | March 19, 2026 */
+/* TFS PUBLISH | app.js | Version 46 | March 19, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -22,6 +22,7 @@ function App() {
   var _dc = useState(14), dayCount = _dc[0], setDayCount = _dc[1];
   var _cf = useState(false), showConfirm = _cf[0], setShowConfirm = _cf[1];
   var _sm = useState(false), showMore = _sm[0], setShowMore = _sm[1];
+  var _stg = useState(false), showTags = _stg[0], setShowTags = _stg[1];
   var _delGrp = useState(null), delGrpIdx = _delGrp[0], setDelGrp = _delGrp[1];
   var _openSec = useState(null), openSec = _openSec[0], setOpenSec = _openSec[1];
   var _ct = useState({}), content = _ct[0], setCt = _ct[1];
@@ -114,7 +115,7 @@ function App() {
   var videoTitle = (dc && dc.topicTitle) || "";
   var schedDate = vd.date ? fmtD(vd.date) : "Unscheduled";
 
-  // ---- PROGRESS (v45: flat checklist) ----
+  // ---- PROGRESS (v46: flat checklist) ----
   var countProgress = function(d, pid) {
     var k = "d" + d + "_" + pid;
     var ck = checks[k] || {};
@@ -152,7 +153,7 @@ function App() {
   var editCk = checks[editCkKey] || {};
   var toggleEditCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[editCkKey] = Object.assign({}, o[editCkKey] || {}); o[editCkKey][id] = !o[editCkKey][id]; return o; }); };
 
-  // ---- CHECKLIST HELPERS (v45) ----
+  // ---- CHECKLIST HELPERS (v46) ----
   var toggleCk = function(id) { setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); o[pK][id] = !o[pK][id]; return o; }); };
   var resetCk = function() { setCk(function(p) { var o = Object.assign({}, p); o[pK] = {}; return o; }); flash("Checklist reset"); };
   var checkSection = function(prefix, items) { if (!items || !items.length) return; setCk(function(p) { var o = Object.assign({}, p); o[pK] = Object.assign({}, o[pK] || {}); var allDone = true; items.forEach(function(_, i) { if (!o[pK][prefix + i]) allDone = false; }); items.forEach(function(_, i) { o[pK][prefix + i] = !allDone; }); return o; }); };
@@ -442,7 +443,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v45 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v46 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -776,6 +777,28 @@ function App() {
             {val&&f.max&&<div style={{fontSize:11,color:val.length>f.max?"#ef4444":"#aaa",marginTop:2}}>{val.length}/{f.max}</div>}
           </div>;})}
         </div>}
+
+        {/* YOUTUBE TAGS (collapsible, pre-filled with universal tags) */}
+        {plat==="youtube"&&(function(){
+          var tagsVal = (pc && pc.tags) || YT_UNIVERSAL_TAGS;
+          return <div style={{marginBottom:12}}>
+            <div onClick={function(){setShowTags(!showTags);}} style={{background:"#fff",border:"1px solid #eeeef2",borderRadius:showTags?"12px 12px 0 0":12,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <i className={"fa-solid fa-chevron-"+(showTags?"down":"right")} style={{fontSize:10,color:"#999"}}/>
+                <span style={{fontSize:13,fontWeight:700,color:"#555"}}>Tags</span>
+                <span style={{fontSize:11,color:"#aaa"}}>26 universal tags (auto-applied)</span>
+              </div>
+              <button onClick={function(e){e.stopPropagation();navigator.clipboard.writeText(tagsVal).then(function(){flash("Tags copied");});}} style={{background:"#FF0000",border:"none",borderRadius:8,padding:"4px 10px",fontSize:12,fontWeight:700,color:"#fff",cursor:"pointer"}}>Copy</button>
+            </div>
+            {showTags&&<div style={{background:"#fafafa",border:"1px solid #eeeef2",borderTop:"none",borderRadius:"0 0 12px 12px",padding:"10px 12px"}}>
+              <div style={{fontSize:12,color:"#666",lineHeight:1.6,marginBottom:8}}>{tagsVal}</div>
+              <div style={{display:"flex",gap:4}}>
+                <button onClick={function(){openEd("tags");}} style={S.eBtn}>Edit</button>
+                <button onClick={function(){setFld(day,"youtube","tags","");flash("Reset to defaults");}} style={{background:"#f0f0f4",border:"1px solid #d4d4db",borderRadius:10,padding:"5px 14px",fontSize:12,color:"#888",cursor:"pointer",fontWeight:600}}>Reset</button>
+              </div>
+            </div>}
+          </div>;
+        })()}
 
         {/* PRE-POST REMINDER (Story 1 or YT Community Post) */}
         {(function(){
