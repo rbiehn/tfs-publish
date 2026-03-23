@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 46 | March 19, 2026 */
+/* TFS PUBLISH | app.js | Version 47 | March 23, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -426,6 +426,7 @@ function App() {
 
           <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 16 }}>
             {[{l:"Publish",v:"publish",ic:"fa-solid fa-paper-plane"},{l:"Calendar",v:"calendar",ic:"fa-solid fa-calendar-days"},{l:"Dashboard",v:"dashboard",ic:"fa-solid fa-grip"},{l:"Queue",v:"queue",ic:"fa-solid fa-pen"},{l:"Reference",v:"reference",ic:"fa-solid fa-circle-question"}].map(function(b){ return <button key={b.v} onClick={function(){goTo(b.v);}} style={{background:"#fff",border:"1px solid #eeeef2",borderRadius:10,padding:"6px 10px",fontSize:11,color:"#777",cursor:"pointer",fontWeight:600,display:"flex",alignItems:"center",gap:4}}><i className={b.ic} style={{fontSize:11}}/>{b.l}</button>;})}
+            {dayCount<MAX_DAYS&&<button onClick={function(){var nd=dayCount+1;setDayCount(nd);setDay(nd);setPlat("shared");goTo("publish");flash("Post #"+nd+" created");}} style={{background:"#f9731618",border:"1px solid #f97316",borderRadius:10,padding:"6px 10px",fontSize:11,color:"#f97316",cursor:"pointer",fontWeight:700,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-plus" style={{fontSize:10}}/>New Post</button>}
           </div>
 
           <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
@@ -443,7 +444,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v46 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v47 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -479,7 +480,7 @@ function App() {
   if (view === "dashboard") {
     var cells3 = [];
     for (var ddi = 1; ddi <= dayCount; ddi++) { var ddTitle = titleFor(ddi); cells3.push(<div key={"r"+ddi} style={{fontSize:12,fontWeight:700,color:"#444",padding:"4px 2px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"flex",alignItems:"center"}}><span style={{fontSize:10,color:"#aaa",marginRight:4}}>#{ddi}</span>{ddTitle.length>12?ddTitle.slice(0,12)+"...":ddTitle}</div>); REAL_PLATFORMS.forEach(function(p){var k2="d"+ddi+"_"+p.id;var ss2=statuses[k2]||"not_started";cells3.push(<div key={k2} onClick={function(){setDay(ddi);setPlat(p.id);goTo("publish");}} style={{background:ST_C[ss2]+"22",border:"1px solid "+ST_C[ss2]+"44",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:4}}><div style={{width:8,height:8,borderRadius:"50%",background:ST_C[ss2]}}/></div>);});}
-    return(<div className="tfs-app" style={S.ctn}><div style={S.topBar}><button onClick={function(){goBack();}} style={S.back}><i className="fa-solid fa-arrow-left" style={{fontSize:13,marginRight:5}}/>Home</button><span style={S.topT}>DASHBOARD</span><div style={{display:"flex",gap:4}}><button onClick={function(){if(dayCount<MAX_DAYS){setDayCount(dayCount+7);flash("Added 7");}}} style={{background:"#f0f0f4",border:"1px solid #d4d4db",borderRadius:8,padding:"6px 10px",fontSize:12,color:"#888",cursor:"pointer",fontWeight:600}}>+7</button></div></div>
+    return(<div className="tfs-app" style={S.ctn}><div style={S.topBar}><button onClick={function(){goBack();}} style={S.back}><i className="fa-solid fa-arrow-left" style={{fontSize:13,marginRight:5}}/>Home</button><span style={S.topT}>DASHBOARD</span><div style={{display:"flex",gap:4}}><button onClick={function(){if(dayCount<MAX_DAYS){setDayCount(dayCount+7);flash("Added 7 posts");}}} style={{background:"#f0f0f4",border:"1px solid #d4d4db",borderRadius:8,padding:"6px 10px",fontSize:12,color:"#888",cursor:"pointer",fontWeight:600}}>+7</button></div></div>
       <div style={{padding:"12px 8px 80px",overflowX:"auto"}}><div style={{display:"grid",gridTemplateColumns:"80px repeat("+REAL_PLATFORMS.length+",1fr)",gap:2,minWidth:400}}>
         <div style={{fontSize:10,fontWeight:700,color:"#aaa",padding:3}}>Title</div>
         {REAL_PLATFORMS.map(function(p){return <div key={p.id} style={{fontSize:11,textAlign:"center"}}><i className={p.icon} style={{color:p.color,fontSize:12}}/></div>;})}
