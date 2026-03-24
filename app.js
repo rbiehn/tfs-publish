@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 47 | March 23, 2026 */
+/* TFS PUBLISH | app.js | Version 48 | March 23, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -224,7 +224,7 @@ function App() {
 
   var genTasks = function() {
     var tasks = []; var tid = 0;
-    var shFields = ["caption", "hashtags", "prompt", "music"];
+    var shFields = ["title", "caption", "hashtags", "prompt", "music"];
     var shDone = 0; shFields.forEach(function(f) { if (taskSh[f]) shDone++; });
     tasks.push({ id: tid++, phase: "prep", label: "Prep shared fields (" + shDone + "/" + shFields.length + ")", done: shDone === shFields.length, nav: function() { setDay(taskDay); setPlat("shared"); goTo("publish"); } });
     var mDone = (media["d" + taskDay + "_v" + taskVer] || {}).mediaStatus === "final";
@@ -444,7 +444,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v47 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v48 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -602,10 +602,20 @@ function App() {
       {/* ============================================ */}
       {plat==="shared"&&<div>
 
-        {/* Video Title (inline) */}
+        {/* File Title (inline) */}
         <div style={S.tf}>
-          <span style={{fontSize:12,fontWeight:700,color:"#444",marginBottom:4,display:"block"}}>Video Title</span>
-          <input type="text" value={videoTitle} onChange={function(e){setMeta(day,"topicTitle",e.target.value);}} placeholder="What this piece is called in Canva or Filmora" style={Object.assign({},S.mI,{fontSize:16,fontWeight:700})}/>
+          <span style={{fontSize:12,fontWeight:700,color:"#444",marginBottom:4,display:"block"}}>File Title</span>
+          <input type="text" value={videoTitle} onChange={function(e){setMeta(day,"topicTitle",e.target.value);}} placeholder="Internal name (Canva or Filmora filename)" style={Object.assign({},S.mI,{fontSize:16,fontWeight:700})}/>
+        </div>
+
+        {/* Video Title (shared, pushes to YT/FB/Reddit) */}
+        <div style={S.tf}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <span style={{fontSize:13,fontWeight:700,color:"#555"}}>Video Title</span>
+            <span style={{fontSize:11,color:"#aaa"}}>Pushes to YT, FB Personal, FB Page, Reddit</span>
+          </div>
+          <input type="text" value={shared.title||""} onChange={function(e){setShared("title",e.target.value);}} placeholder="Title Case. 100ch max for YouTube." style={Object.assign({},S.mI,{fontWeight:600})}/>
+          {shared.title&&shared.title.length>100&&<span style={{fontSize:11,color:"#ef4444",marginTop:2,display:"block"}}>{shared.title.length}/100 (over YT limit)</span>}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
           <div><span style={{fontSize:12,fontWeight:700,color:"#444"}}>Content Type</span><select value={(dc&&dc.contentType)||"none"} onChange={function(e){setMeta(day,"contentType",e.target.value);}} style={S.dIn}>{CONTENT_TYPES.map(function(c){return <option key={c.id} value={c.id}>{c.label}</option>;})}</select></div>
@@ -658,20 +668,22 @@ function App() {
 
         {/* PUSH ALL BUTTON */}
         {(function(){
-          var shFields = ["caption","hashtags","prompt","music"];
+          var shFields = ["title","caption","hashtags","prompt","music"];
           var filledCount = 0; shFields.forEach(function(f) { if (shared[f]) filledCount++; });
           var indexVal = ((dc&&dc.indexEvergreen)||INDEX_EVERGREEN_DEFAULT) + "\n" + ((dc&&dc.indexTopic)||"");
           var doPushAll = function() {
-            var pushTargets = ["tiktok","instagram","youtube","fb_page","x"];
-            var allTargets = ["tiktok","instagram","youtube","fb_page","fb_personal","x"];
-            if (shared.caption) pushTargets.forEach(function(pid) {
+            var captionTargets = ["tiktok","instagram","youtube","fb_personal","fb_page","x","reddit"];
+            var hashtagTargets = ["tiktok","instagram","youtube","fb_page","x"];
+            var allTargets = ["tiktok","instagram","youtube","fb_page","fb_personal","x","reddit"];
+            if (shared.caption) captionTargets.forEach(function(pid) {
               // YouTube uses 'description', all others use 'copy'
               var fieldKey = pid === "youtube" ? "description" : "copy";
               setFld(day, pid, fieldKey, shared.caption);
             });
-            if (shared.hashtags) pushTargets.forEach(function(pid) { setFld(day, pid, "hashtags", shared.hashtags); });
+            if (shared.hashtags) hashtagTargets.forEach(function(pid) { setFld(day, pid, "hashtags", shared.hashtags); });
             if (shared.prompt) { setFld(day, "instagram", "prompt", shared.prompt); }
             if (shared.music) TRENDING_PLATFORMS.forEach(function(pid) { setFld(day, pid, "musicNote", shared.music); });
+            if (shared.title) { setFld(day, "youtube", "title", shared.title); setFld(day, "fb_personal", "title", shared.title); setFld(day, "fb_page", "reel_title", shared.title); setFld(day, "reddit", "title", shared.title); }
             allTargets.forEach(function(pid) { setFld(day, pid, "keywords", indexVal.trim()); });
             setFld(day, "youtube", "tags", YT_UNIVERSAL_TAGS);
             flash("Pushed to all platforms");
@@ -680,8 +692,8 @@ function App() {
             <button onClick={doPushAll} style={{width:"100%",background:"#f97316",border:"none",borderRadius:14,padding:"14px",fontSize:15,fontWeight:800,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               <i className="fa-solid fa-paper-plane"/><span>Push All to Platforms</span>
             </button>
-            <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:8}}>
-              {shFields.map(function(f){var filled = !!shared[f]; return <span key={f} style={{fontSize:11,fontWeight:600,color:filled?"#22c55e":"#ccc"}}>{filled?"\u2713":"\u25cb"} {f}</span>;})}
+            <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:8,flexWrap:"wrap"}}>
+              {["title","caption","hashtags","prompt","music"].map(function(f){var filled = !!shared[f]; return <span key={f} style={{fontSize:11,fontWeight:600,color:filled?"#22c55e":"#ccc"}}>{filled?"\u2713":"\u25cb"} {f}</span>;})}
               <span style={{fontSize:11,fontWeight:600,color:(dc&&dc.indexTopic)?"#22c55e":"#ccc"}}>{(dc&&dc.indexTopic)?"\u2713":"\u25cb"} indexing</span>
             </div>
           </div>;
@@ -691,11 +703,12 @@ function App() {
         <div style={{background:"#f4f4f8",border:"1px solid #eeeef2",borderRadius:12,padding:"10px 14px",marginTop:8}}>
           <div style={{fontSize:12,fontWeight:700,color:"#888",marginBottom:6}}>After push, customize per platform:</div>
           <div style={{fontSize:12,color:"#666",lineHeight:1.7}}>
+            <span style={{color:"#FF0000",fontWeight:600}}>YT:</span> Add hashtag tail to title, review description<br/>
             <span style={{color:"#E1306C",fontWeight:600}}>IG:</span> Shorten caption, add "link in bio" CTA<br/>
-            <span style={{color:"#4267B2",fontWeight:600}}>FB Pers:</span> Rewrite in casual voice, drop hashtags/CTAs<br/>
-            <span style={{color:"#FF0000",fontWeight:600}}>YT:</span> Add title, description, tags<br/>
-            <span style={{color:"#1877F2",fontWeight:600}}>FB Page:</span> Add reel title<br/>
-            <span style={{color:"#444",fontWeight:600}}>X:</span> Trim to 280ch, set screenshot, exactly 2 hashtags
+            <span style={{color:"#4267B2",fontWeight:600}}>FB Pers:</span> Rewrite caption in casual voice, drop hashtags/CTAs<br/>
+            <span style={{color:"#1877F2",fontWeight:600}}>FB Page:</span> Review reel title<br/>
+            <span style={{color:"#444",fontWeight:600}}>X:</span> Trim to 280ch, set screenshot, exactly 2 hashtags<br/>
+            <span style={{color:"#FF4500",fontWeight:600}}>Reddit:</span> Edit body for subreddit rules
           </div>
         </div>
       </div>}
@@ -776,6 +789,7 @@ function App() {
             {val?<div onClick={function(){navigator.clipboard.writeText(val).then(function(){flash(f.label+" copied");});}} style={{fontSize:13,color:"#2d2d3d",whiteSpace:"pre-wrap",wordBreak:"break-word",lineHeight:1.45,cursor:"pointer",borderRadius:8,padding:4,marginTop:4,background:"#fafafa"}}>{val}</div>
             :<div style={{fontSize:12,color:"#ccc",fontStyle:"italic",marginTop:4}}>Not set. Tap Edit to add.</div>}
             {val&&f.max&&<div style={{fontSize:11,color:val.length>f.max?"#ef4444":"#aaa",marginTop:2}}>{val.length}/{f.max}</div>}
+            {plat==="youtube"&&f.key==="title"&&<div style={{fontSize:11,color:"#f59e0b",background:"#fefce8",border:"1px solid #fef08a",borderRadius:8,padding:"6px 10px",marginTop:6,lineHeight:1.5}}>Replace the plain-text branding tail (e.g., "YA Dystopian Fantasy Author") with 1-3 hashtags that cover the same keywords (e.g., #YADystopian #YAFantasy #BookTok)</div>}
           </div>;})}
         </div>}
 

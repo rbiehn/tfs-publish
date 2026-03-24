@@ -3,9 +3,9 @@
 var PLATFORMS = [
   { id: "shared", label: "Shared", icon: "fa-solid fa-share-nodes", color: "#f97316", special: true },
   { id: "editing", label: "Editing", icon: "fa-solid fa-scissors", color: "#2563eb", special: true },
+  { id: "youtube", label: "YouTube", icon: "fa-brands fa-youtube", color: "#FF0000", by: "Robert", via: "YouTube Studio (desktop)" },
   { id: "tiktok", label: "TikTok", icon: "fa-brands fa-tiktok", color: "#ff0050", by: "Robert", via: "TikTok Studio" },
   { id: "instagram", label: "Instagram", icon: "fa-brands fa-instagram", color: "#E1306C", by: "Robert", via: "Native app" },
-  { id: "youtube", label: "YouTube", icon: "fa-brands fa-youtube", color: "#FF0000", by: "Robert", via: "YouTube Studio" },
   { id: "fb_personal", label: "FB Pers", icon: "fa-solid fa-user", color: "#4267B2", by: "Robert", via: "Native app" },
   { id: "fb_page", label: "FB Page", icon: "fa-brands fa-facebook", color: "#1877F2", by: "Robert", via: "Meta Business Suite" },
   { id: "fb_groups", label: "Groups", icon: "fa-solid fa-users", color: "#3b5998", by: "Miza", via: "Native app" },
@@ -109,7 +109,7 @@ var CHECKLISTS = {
   youtube: [
     "YouTube Studio (desktop)",
     "Upload video (auto-detected as Short if 9:16 and under 3 min)",
-    "Add title",
+    "Add title (paste from app, add hashtag tail)",
     "Verify visibility is Public (YT Studio sometimes flips to Private)",
     "Schedule (date and time)",
     "Verify 'Not made for kids'",
@@ -141,7 +141,7 @@ var CHECKLISTS = {
     "Upload video",
     "Add trending music (3% if original music)",
     "Add description (casual Robert voice, same as FB Groups/YT Community)",
-    "Add title (match YouTube Shorts title)",
+    "Add title (paste from app, no hashtags)",
     "Schedule first (greys out some options)",
     "Share to your story: ON",
     "Add to playlist (if relevant)",
@@ -299,12 +299,12 @@ var TEMPLATES = {
     { key: "prompt", label: "Comment Prompt", hint: "Pinned question at top of comments" }
   ],
   youtube: [
-    { key: "title", label: "Title", hint: "100ch limit. Title Case.", max: 100 },
+    { key: "title", label: "Title", hint: "100ch limit. Title Case. End with 1-3 hashtags.", max: 100 },
     { key: "description", label: "Description", hint: "Add from desktop. Hashtags go here.", multi: true },
     { key: "hashtags", label: "Hashtags", hint: "2-3 discovery, no #Shorts" }
   ],
   fb_personal: [
-    { key: "title", label: "Title", hint: "Match YouTube Shorts title" },
+    { key: "title", label: "Title", hint: "Auto-filled from shared. Should match YT title (without hashtags)." },
     { key: "copy", label: "Caption", hint: "Casual Robert. No hashtags/CTAs.", multi: true }
   ],
   fb_page: [
