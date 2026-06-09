@@ -1,7 +1,7 @@
 /* TFS PUBLISH | utils.js | Version 46 | March 19, 2026 */
 
-var SUPABASE_URL = "https://fiyamhxmszuxfpnfnuwz.supabase.co";
-var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpeWFtaHhtc3p1eGZwbmZudXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDg3NjMsImV4cCI6MjA4ODgyNDc2M30.cbQvMcCJnhon4qQ-C9uViubQyKapfBpVpA3Q8tU4KIM";
+var SUPABASE_URL = "https://gewufsselhrzbzrctruo.supabase.co";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdld3Vmc3NlbGhyemJ6cmN0cnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzA5MDYsImV4cCI6MjA5MzE0NjkwNn0.rxkzHvpy6Gkw454cSWOApp8ycf-SjqBL4yg1sj7HFXU";
 var _sbLib = window.supabase || window.Supabase || null;
 var _sb = _sbLib ? _sbLib.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 if (!_sb) console.warn("Supabase not loaded. window.supabase:", typeof window.supabase, "window.Supabase:", typeof window.Supabase);
