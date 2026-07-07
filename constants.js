@@ -1,4 +1,4 @@
-/* TFS PUBLISH | constants.js | Version 46 | March 19, 2026 */
+/* TFS PUBLISH | constants.js | exousia.world | rbiehn.github.io/tfs-publish | Version 49 | July 07, 2026 */
 
 var PLATFORMS = [
   { id: "shared", label: "Shared", icon: "fa-solid fa-share-nodes", color: "#f97316", special: true },
@@ -8,27 +8,19 @@ var PLATFORMS = [
   { id: "instagram", label: "Instagram", icon: "fa-brands fa-instagram", color: "#E1306C", by: "Robert", via: "Native app" },
   { id: "fb_personal", label: "FB Pers", icon: "fa-solid fa-user", color: "#4267B2", by: "Robert", via: "Native app" },
   { id: "fb_page", label: "FB Page", icon: "fa-brands fa-facebook", color: "#1877F2", by: "Robert", via: "Meta Business Suite" },
-  { id: "fb_groups", label: "Groups", icon: "fa-solid fa-users", color: "#3b5998", by: "Miza", via: "Native app" },
+  { id: "discord", label: "Discord", icon: "fa-brands fa-discord", color: "#5865F2", by: "Robert", via: "Discord app (discord.gg/medzFWVWfh)" },
   { id: "x", label: "X", icon: "fa-brands fa-x-twitter", color: "#444", by: "Robert", via: "Browser (x.com)" },
   { id: "reddit", label: "Reddit", icon: "fa-brands fa-reddit-alien", color: "#FF4500", by: "Robert", via: "Browser" },
+  { id: "fb_groups", label: "Groups", icon: "fa-solid fa-users", color: "#3b5998", by: "Miza", via: "Native app", lowPriority: true },
 ];
 var REAL_PLATFORMS = PLATFORMS.filter(function(p) { return !p.special; });
 
+/* v49: Version letters redefined. Kept the 3-version structure; changed meaning.
+   C = Carousel, B = Trending audio, A = Talking head / B-roll / other. */
 var VERSIONS = [
-  { id: "a", label: "A: Talking Head", short: "A", music: "Trending sound in TikTok app" },
-  { id: "b", label: "B: Caption React", short: "B", music: "Ambient/cinematic from Envato" },
-  { id: "c", label: "C: B-Roll", short: "C", music: "Atmospheric from Envato" },
-];
-
-var CONTENT_TYPES = [
-  { id: "none", label: "Not Set", short: "" },
-  { id: "personal", label: "Personal Story", short: "PS" },
-  { id: "world", label: "World / Lore", short: "WL" },
-  { id: "bts", label: "Behind the Scenes", short: "BTS" },
-  { id: "pitch", label: "Book Pitch", short: "BP" },
-  { id: "craft", label: "Writing Craft", short: "WC" },
-  { id: "community", label: "Community / Fan", short: "CF" },
-  { id: "collab", label: "Collab / Feature", short: "CO" },
+  { id: "a", label: "A: Talking head / B-roll", short: "A", music: "Original or ambient audio (talking head, B-roll, other)" },
+  { id: "b", label: "B: Trending audio", short: "B", music: "Trending sound native per platform" },
+  { id: "c", label: "C: Carousel", short: "C", music: "Optional trending sound (carousel / static frames)" },
 ];
 
 var SALESY_LEVELS = [
@@ -46,14 +38,15 @@ var SCHED_NOTES = {
   youtube: "YouTube Studio (desktop). No limit.",
   fb_personal: "Native app (mobile). Professional mode required.",
   fb_page: "Meta Business Suite (desktop).",
-  fb_groups: "Next-day task (Miza). Share from live FB Personal post.",
+  fb_groups: "Next-day task (Miza). Share from live FB Personal post. LOW PRIORITY.",
+  discord: "Manual post in the Exousia server. No native scheduling. discord.gg/medzFWVWfh",
   x: "Manual only. No scheduling without X Premium.",
   reddit: "Manual post via browser.",
 };
 
 var EDITING_CL = {
   steph: [
-    "Edit raw footage per version style (A: Talking Head, B: Caption React, C: B-Roll Cinematic)",
+    "Edit per version type (C: Carousel, B: Trending audio, A: Talking head / B-roll / other)",
     "Add auto-captions in Filmora, correct proper nouns (Exousia, Cass, Evelon, Prism Spire)",
     "Add zoom frames (split-and-scale method)",
     "Add on-screen text overlay keywords for indexing (from Shared Fields)",
@@ -157,6 +150,16 @@ var CHECKLISTS = {
     "Add tags/stickers",
     "Add description",
     "Schedule"
+  ],
+  discord: [
+    "Open the Exousia Discord server (discord.gg/medzFWVWfh)",
+    "Post to the server (announcements or community channel)",
+    "Include the link (link in bio / chapter / quiz link)",
+    "Attach the cover image",
+    "Casual community voice (talking to members, not marketing at them)",
+    "0 hashtags",
+    /* TODO: confirm with Robert - exact channel(s) to post in */
+    "Post"
   ],
   fb_groups: [],
   x: [
@@ -280,6 +283,7 @@ var STORY_CHECKLISTS = {
     ]
   },
   youtube: {},
+  discord: {},
   fb_groups: {},
   reddit: {},
 };
@@ -312,6 +316,9 @@ var TEMPLATES = {
     { key: "reel_title", label: "Reel Title", hint: "Required" },
     { key: "hashtags", label: "Hashtags", hint: "0-1" }
   ],
+  discord: [
+    { key: "copy", label: "Message", hint: "Casual community voice. 2000 max. Include link + cover image. 0 hashtags.", max: 2000, multi: true }
+  ],
   fb_groups: [],
   x: [
     { key: "copy", label: "Caption", hint: "280 max. Sentence case.", max: 280, multi: true },
@@ -325,11 +332,12 @@ var TEMPLATES = {
   ],
 };
 
-var YT_UNIVERSAL_TAGS = "YA fantasy, YA dystopian fantasy, debut author, epic fantasy, fantasy worldbuilding, fantasy books, booktok, writing process, author life, Shadow and Bone, An Ember in the Ashes, Children of Blood and Bone, Red Rising, Grishaverse, dark fantasy, debut YA fantasy novel, fantasy reader, book recommendations, fantasy TBR, morally gray characters, dystopian fiction, Leigh Bardugo, Sabaa Tahir, Tomi Adeyemi, Pierce Brown, magic";
+var YT_UNIVERSAL_TAGS = "the first stone, world of exousia, Robert Biehn, fantasy books, ya books, ya fantasy, epic fantasy, dystopian books, dystopian fantasy, dark fantasy, debut author, writing life, worldbuilding, found family, sibling bonds, morally grey, elemental powers, regime oppression, shadow and bone, an ember in the ashes, red rising, booktok, fantasy book recommendations, books like shadow and bone, fantasy series, hunger games, fourth wing, mistborn, children of blood and bone, ya lit";
 
 var INDEX_EVERGREEN_DEFAULT = "YA dystopian fantasy author";
 
 var FB_GROUPS_PROTOCOL = {
+  priority: "LOW PRIORITY. Performance has been weak. Do these last, only if time allows.",
   source: "Share Robert's personal profile post (NOT the Page post)",
   timing: "Morning after each posting day (Tue/Thu/Sat for Mon/Wed/Fri posts)",
   pace: "6-7 groups per hour, max 20 groups per day",
@@ -348,8 +356,8 @@ var M_ST_L = { no_media: "No Media", raw_uploaded: "Uploaded", in_editing: "Edit
 
 var MAX_DAYS = 65;
 
-var PLAT_CHAR_LIMITS = { tiktok: 4000, instagram: 2200, youtube: 5000, fb_page: 63206, fb_personal: 63206, x: 280, reddit: 40000 };
-var PLAT_HASHTAG_LIMITS = { tiktok: 4, instagram: 5, youtube: 3, fb_page: 1, fb_personal: 0, fb_groups: 0, x: 2, reddit: 0 };
+var PLAT_CHAR_LIMITS = { tiktok: 4000, instagram: 2200, youtube: 5000, fb_page: 63206, fb_personal: 63206, discord: 2000, x: 280, reddit: 40000 };
+var PLAT_HASHTAG_LIMITS = { tiktok: 4, instagram: 5, youtube: 3, fb_page: 1, fb_personal: 0, discord: 0, fb_groups: 0, x: 2, reddit: 0 };
 var TRENDING_PLATFORMS = ["tiktok","instagram","youtube","fb_page","fb_personal"];
 
 var XP_VALUES = { shared: 20, platform: 50, comment: 30, story: 20, group: 2 };

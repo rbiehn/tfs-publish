@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | Version 48 | March 23, 2026 */
+/* TFS PUBLISH | app.js | exousia.world | rbiehn.github.io/tfs-publish | Version 49 | July 07, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -25,6 +25,11 @@ function App() {
   var _stg = useState(false), showTags = _stg[0], setShowTags = _stg[1];
   var _delGrp = useState(null), delGrpIdx = _delGrp[0], setDelGrp = _delGrp[1];
   var _openSec = useState(null), openSec = _openSec[0], setOpenSec = _openSec[1];
+  // v49: collapsible SHARED sub-sections (default collapsed). Set of open section keys.
+  var _openShared = useState({}), openShared = _openShared[0], setOpenShared = _openShared[1];
+  var toggleShared = function(k) { setOpenShared(function(p) { var o = Object.assign({}, p); o[k] = !o[k]; return o; }); };
+  // v49: tracks which days were auto-prefilled from the last post (for the affordance label)
+  var _prefilled = useState({}), prefilled = _prefilled[0], setPrefilled = _prefilled[1];
   var _ct = useState({}), content = _ct[0], setCt = _ct[1];
   var _ck = useState({}), checks = _ck[0], setCk = _ck[1];
   var _st = useState({}), statuses = _st[0], setSt = _st[1];
@@ -110,7 +115,6 @@ function App() {
   var aPlat = PLATFORMS.find(function(p) { return p.id === plat; });
   var isSpecial = aPlat && aPlat.special;
   var shared = (dc && dc.shared) || {};
-  var cType = CONTENT_TYPES.find(function(c) { return c.id === (dc && dc.contentType || "none"); });
   var sLevel = SALESY_LEVELS.find(function(s) { return s.id === (dc && dc.salesy || "none"); });
   var videoTitle = (dc && dc.topicTitle) || "";
   var schedDate = vd.date ? fmtD(vd.date) : "Unscheduled";
@@ -182,8 +186,23 @@ function App() {
   var dlDayMd = function() { var md = exportDayMd(day, content[day]); var blob = new Blob([md], { type: "text/markdown" }); var u = URL.createObjectURL(blob); var a = document.createElement("a"); a.href = u; a.download = "TFS_" + day + ".md"; a.click(); flash("Markdown downloaded"); };
   var dlBlankMd = function() { var md = generateBlankMd(day); var blob = new Blob([md], { type: "text/markdown" }); var u = URL.createObjectURL(blob); var a = document.createElement("a"); a.href = u; a.download = "TFS_" + day + "_template.md"; a.click(); flash("Template downloaded"); };
   var importDayMd = function() { var inp = document.createElement("input"); inp.type = "file"; inp.accept = ".md,.txt,.markdown"; inp.onchange = function(e) { var f = e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(ev) { try { var parsed = parseDayMd(ev.target.result); var targetDay = parsed.dayNum || day; var merged = mergeDayMd(parsed, content[targetDay]); setCt(function(p) { var o = Object.assign({}, p); o[targetDay] = merged; return o; }); if (targetDay !== day) setDay(targetDay); flash("Imported (" + Object.keys(parsed.platforms).length + " platforms)"); } catch (err) { console.error("MD import error:", err); flash("Import error"); } }; r.readAsText(f); }; inp.click(); };
-  var quickFill = function(srcDay) { var src = content[srcDay]; if (!src) return; setCt(function(p) { var o = Object.assign({}, p); var dd = Object.assign({ topicTitle: "", contentType: "none", salesy: "none", postTime: "", platforms: {}, shared: {}, indexEvergreen: INDEX_EVERGREEN_DEFAULT, indexTopic: "" }, o[day] || {}); if (src.shared) dd.shared = JSON.parse(JSON.stringify(src.shared)); if (src.platforms) { REAL_PLATFORMS.forEach(function(rp) { if (src.platforms[rp.id]) { dd.platforms = Object.assign({}, dd.platforms); dd.platforms[rp.id] = JSON.parse(JSON.stringify(src.platforms[rp.id])); } }); } dd.contentType = src.contentType || "none"; o[day] = dd; return o; }); flash("Filled from #" + srcDay); };
-  var exportDayCopy = function() { var lines = ["=== " + (videoTitle || "#" + day) + " ==="]; if (dc && dc.postTime) lines.push("Post Time: " + dc.postTime); var vda = getVD(day, "a"); if (vda.date) lines.push("Date: " + vda.date); lines.push(""); if (shared) { ["caption", "hashtags", "keywords", "music", "prompt", "title"].forEach(function(f) { if (shared[f]) lines.push("SHARED " + f.toUpperCase() + ": " + shared[f]); }); } lines.push(""); REAL_PLATFORMS.forEach(function(p) { var pcc = dc && dc.platforms && dc.platforms[p.id]; if (!pcc) return; lines.push("--- " + (p.label || "X").toUpperCase() + " ---"); if (pcc.title) lines.push("Title: " + pcc.title); if (pcc.copy) lines.push("Caption: " + pcc.copy); if (pcc.hashtags) lines.push("Hashtags: " + pcc.hashtags); if (pcc.prompt) lines.push("Prompt: " + pcc.prompt); if (pcc.description) lines.push("Description: " + pcc.description); if (pcc.tags) lines.push("Tags: " + pcc.tags); if (pcc.reel_title) lines.push("Reel Title: " + pcc.reel_title); lines.push(""); }); var txt = lines.join("\n"); navigator.clipboard.writeText(txt).then(function() { flash("All copy exported"); }); };
+  // v49: quickFill clones shared + per-platform copy from a source day into the current day.
+  // targetDay defaults to current day. If silent, no toast (used by auto-prefill on a fresh post).
+  var quickFill = function(srcDay, targetDay, silent) { var tgt = targetDay || day; var src = content[srcDay]; if (!src) return; setCt(function(p) { var o = Object.assign({}, p); var dd = Object.assign({ topicTitle: "", salesy: "none", platforms: {}, shared: {}, indexEvergreen: INDEX_EVERGREEN_DEFAULT, indexTopic: "" }, o[tgt] || {}); if (src.shared) dd.shared = JSON.parse(JSON.stringify(src.shared)); if (src.platforms) { REAL_PLATFORMS.forEach(function(rp) { if (src.platforms[rp.id]) { dd.platforms = Object.assign({}, dd.platforms); dd.platforms[rp.id] = JSON.parse(JSON.stringify(src.platforms[rp.id])); } }); } o[tgt] = dd; return o; }); if (!silent) flash("Filled from #" + srcDay); };
+  // v49: find the highest-numbered non-empty day strictly before d
+  var lastNonEmptyDayBefore = function(d) { for (var i = d - 1; i >= 1; i--) { var c = content[i]; if (c && (c.topicTitle || (c.shared && Object.keys(c.shared).length) || (c.platforms && Object.keys(c.platforms).length))) return i; } return null; };
+  var isDayEmpty = function(d) { var c = content[d]; if (!c) return true; if (c.topicTitle) return false; if (c.shared && Object.keys(c.shared).length) return false; if (c.platforms && Object.keys(c.platforms).length) return false; return true; };
+  // v49: when the current day is empty, auto-prefill from the most recent non-empty prior post
+  useEffect(function() {
+    if (!loaded) return;
+    if (!isDayEmpty(day)) return;
+    if (prefilled[day]) return;
+    var src = lastNonEmptyDayBefore(day);
+    if (src == null) return;
+    quickFill(src, day, true);
+    setPrefilled(function(p) { var o = Object.assign({}, p); o[day] = src; return o; });
+  }, [day, loaded]);
+  var exportDayCopy = function() { var lines = ["=== " + (videoTitle || "#" + day) + " ==="]; var vda = getVD(day, "a"); if (vda.date) lines.push("Date: " + vda.date); lines.push(""); if (shared) { ["caption", "hashtags", "keywords", "music", "prompt", "title"].forEach(function(f) { if (shared[f]) lines.push("SHARED " + f.toUpperCase() + ": " + shared[f]); }); } lines.push(""); REAL_PLATFORMS.forEach(function(p) { var pcc = dc && dc.platforms && dc.platforms[p.id]; if (!pcc) return; lines.push("--- " + (p.label || "X").toUpperCase() + " ---"); if (pcc.title) lines.push("Title: " + pcc.title); if (pcc.copy) lines.push("Caption: " + pcc.copy); if (pcc.hashtags) lines.push("Hashtags: " + pcc.hashtags); if (pcc.prompt) lines.push("Prompt: " + pcc.prompt); if (pcc.description) lines.push("Description: " + pcc.description); if (pcc.tags) lines.push("Tags: " + pcc.tags); if (pcc.reel_title) lines.push("Reel Title: " + pcc.reel_title); lines.push(""); }); var txt = lines.join("\n"); navigator.clipboard.writeText(txt).then(function() { flash("All copy exported"); }); };
 
   // ---- SEND POST EMAIL ----
   var sendPostEmail = function(d, platId) { if (!_sb) return; var dc2 = content[d] || {}; var pObj = PLATFORMS.find(function(p) { return p.id === platId; }); _sb.rpc("send_post_email", { day_num: d, plat_name: pObj ? (pObj.label || "X") : "", topic: dc2.topicTitle || "#" + d, remaining_items: "", app_url: "https://rbiehn.github.io/tfs-publish/?day=" + d }).catch(function(err) { console.error("Email error:", err); }); };
@@ -416,7 +435,7 @@ function App() {
             <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg, #f97316, #fb923c)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, fontWeight: 800, color: "#fff", boxShadow: "0 4px 12px #f9731640" }}>R</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: "#1a1a2e", lineHeight: 1.2 }}>Hey, Robert</div>
-              <div style={{ fontSize: 13, color: "#999", marginTop: 2 }}>{titleFor(taskDay)}{taskDc.postTime ? " \u00b7 " + taskDc.postTime : ""}{getVD(taskDay, "a").date ? " \u00b7 " + fmtD(getVD(taskDay, "a").date) : ""}</div>
+              <div style={{ fontSize: 13, color: "#999", marginTop: 2 }}>{titleFor(taskDay)}{getVD(taskDay, "a").date ? " \u00b7 " + fmtD(getVD(taskDay, "a").date) : ""}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg, #fff7ed, #fef3c7)", border: "1px solid #fed7aa", borderRadius: 14, padding: "8px 12px", boxShadow: "0 2px 8px #f9731615" }}>
               <i className="fa-solid fa-fire" style={{ color: "#f97316", fontSize: 18 }} />
@@ -444,7 +463,7 @@ function App() {
           {renderPhase("Follow-up", "#22c55e", taskData.followup)}
 
           <div style={{ padding: "30px 0 60px", textAlign: "center" }}>
-            <div style={{ fontSize: 11, color: "#ccc" }}>v48 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
+            <div style={{ fontSize: 11, color: "#ccc" }}>v49 \u00b7 Best streak: {bestStreak} \u00b7 30d: {consist}%</div>
           </div>
         </div>
       </div>
@@ -578,9 +597,8 @@ function App() {
         <button onClick={function(){setDay(Math.max(1,day-1));setShowDelDay(false);}} style={S.dArr}>{"\u2039"}</button>
         <button onClick={function(){setShowDP(!showDP);}} style={S.dDisp}>
           <span style={{fontSize:15,fontWeight:800,color:"#f97316"}}>{videoTitle || "(untitled #" + day + ")"}{dayAllDone(day)?" \u2713":""}</span>
-          <span style={{fontSize:12,color:"#777"}}>{schedDate}{dc&&dc.postTime?" \u00b7 "+dc.postTime:""}</span>
+          <span style={{fontSize:12,color:"#777"}}>{schedDate}</span>
           <div style={{display:"flex",gap:4,justifyContent:"center",marginTop:2}}>
-            {cType&&cType.id!=="none"&&<span style={{fontSize:10,background:"#f0f0f4",border:"1px solid #d4d4db",borderRadius:4,padding:"1px 5px",color:"#666"}}>{cType.label}</span>}
             {sLevel&&sLevel.id!=="none"&&<span style={{fontSize:10,background:sLevel.color+"18",border:"1px solid "+sLevel.color+"33",borderRadius:4,padding:"1px 5px",color:sLevel.color}}>{sLevel.label}</span>}
           </div>
         </button>
@@ -617,14 +635,15 @@ function App() {
           <input type="text" value={shared.title||""} onChange={function(e){setShared("title",e.target.value);}} placeholder="Title Case. 100ch max for YouTube." style={Object.assign({},S.mI,{fontWeight:600})}/>
           {shared.title&&shared.title.length>100&&<span style={{fontSize:11,color:"#ef4444",marginTop:2,display:"block"}}>{shared.title.length}/100 (over YT limit)</span>}
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
-          <div><span style={{fontSize:12,fontWeight:700,color:"#444"}}>Content Type</span><select value={(dc&&dc.contentType)||"none"} onChange={function(e){setMeta(day,"contentType",e.target.value);}} style={S.dIn}>{CONTENT_TYPES.map(function(c){return <option key={c.id} value={c.id}>{c.label}</option>;})}</select></div>
+        {/* v49: prefilled-from-last-post affordance */}
+        {prefilled[day]&&<div style={{display:"flex",alignItems:"center",gap:8,background:"#f9731610",border:"1px solid #f9731633",borderRadius:12,padding:"8px 12px",marginBottom:16}}>
+          <i className="fa-solid fa-clone" style={{color:"#f97316",fontSize:12}}/>
+          <span style={{fontSize:12,color:"#c2560c",fontWeight:600,flex:1}}>Started from last post (#{prefilled[day]}). Edit or clear anything below.</span>
+        </div>}
+
+        {/* Salesy (Content Type + Post Time removed in v49) */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8,marginBottom:16}}>
           <div><span style={{fontSize:12,fontWeight:700,color:"#444"}}>Salesy</span><select value={(dc&&dc.salesy)||"none"} onChange={function(e){setMeta(day,"salesy",e.target.value);}} style={S.dIn}>{SALESY_LEVELS.map(function(s){return <option key={s.id} value={s.id}>{s.label}</option>;})}</select></div>
-          <div><span style={{fontSize:12,fontWeight:700,color:"#444"}}>Post Time</span><input type="time" value={(dc&&dc.postTime)||""} onChange={function(e){setMeta(day,"postTime",e.target.value);}} style={S.dIn}/></div>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-          <div><span style={{fontSize:12,fontWeight:700,color:"#444"}}>vA Date</span><input type="date" value={getVD(day,"a").date||""} onChange={function(e){onADate(day,e.target.value);}} style={S.dIn}/></div>
-          <div><span style={{fontSize:12,fontWeight:700,color:"#444"}}>vA Time</span><input type="time" value={getVD(day,"a").time||""} onChange={function(e){setVF(day,"a","time",e.target.value);}} style={S.dIn}/></div>
         </div>
 
         {/* Caption */}
@@ -634,37 +653,57 @@ function App() {
           <AlgoW flags={scanAlgo(shared.caption||"")}/>
         </div>
 
-        {/* Hashtags */}
-        <div style={S.tf}>
-          <span style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:4,display:"block"}}>Hashtags</span>
-          <AutoTextarea value={shared.hashtags||""} onChange={function(e){setShared("hashtags",e.target.value);}} placeholder="4 total: 1 anchor + 1-2 genre + 0-1 comp" style={Object.assign({},S.mI,{minHeight:44})}/>
-        </div>
-
-        {/* Prompt / CTA Question */}
-        <div style={S.tf}>
-          <span style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:4,display:"block"}}>Prompt / CTA Question</span>
-          <AutoTextarea value={shared.prompt||""} onChange={function(e){setShared("prompt",e.target.value);}} placeholder="Engagement question. Used as IG comment prompt." style={Object.assign({},S.mI,{minHeight:44})}/>
-        </div>
-
-        {/* Music */}
-        <div style={S.tf}>
-          <span style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:4,display:"block"}}>Music / Trending Sound</span>
-          <AutoTextarea value={shared.music||""} onChange={function(e){setShared("music",e.target.value);}} placeholder="Mood, what to search for, trending sound name..." style={Object.assign({},S.mI,{minHeight:44})}/>
-        </div>
-
-        {/* On-Screen Indexing (= Keywords, auto-pushed to all) */}
-        <div style={S.tf}>
-          <span style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:2,display:"block"}}>On-Screen Indexing</span>
-          <div style={{fontSize:11,color:"#aaa",marginBottom:8}}>Two phrases baked into every video. Push All sends these as keywords to all platforms.</div>
-          <div style={{marginBottom:8}}><span style={{fontSize:12,fontWeight:600,color:"#666"}}>Evergreen</span><input type="text" value={(dc&&dc.indexEvergreen)||INDEX_EVERGREEN_DEFAULT} onChange={function(e){setMeta(day,"indexEvergreen",e.target.value);}} style={S.mI}/></div>
-          <div><span style={{fontSize:12,fontWeight:600,color:"#666"}}>Topic</span><input type="text" value={(dc&&dc.indexTopic)||""} onChange={function(e){setMeta(day,"indexTopic",e.target.value);}} placeholder="e.g. book to screen, fantasy worldbuilding" style={S.mI}/></div>
-        </div>
-
-        {/* Related Video (shared, not per-platform) */}
-        <div style={S.tf}>
-          <span style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:4,display:"block"}}>Related Video</span>
-          <input type="text" value={shared.relatedVideo||""} onChange={function(e){setShared("relatedVideo",e.target.value);}} placeholder="Which content piece connects to this one" style={S.mI}/>
-        </div>
+        {/* ============================================ */}
+        {/* v49: COLLAPSED-BY-DEFAULT SHARED SECTIONS */}
+        {/* Hashtags, Prompt/CTA, Music, Indexing, Related Video, VA Date, VA Time */}
+        {/* ============================================ */}
+        {(function(){
+          var relVal = (shared.relatedVideo||"");
+          // Related Video summary when collapsed: ONLY file title + video title
+          var relSummary = (openShared.related) ? "" : ([ (videoTitle||""), (shared.title||"") ].filter(function(x){return x;}).join(" · ") || "");
+          var renderCol = function(key, title, filled, summary, body){
+            var isOpen = !!openShared[key];
+            return <div style={{marginBottom:8}}>
+              <div onClick={function(){toggleShared(key);}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",background:"#fff",border:"1px solid #eeeef2",borderRadius:isOpen?"16px 16px 0 0":16,cursor:"pointer",boxShadow:"0 1px 4px #00000006"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,flex:1,minWidth:0}}>
+                  <i className={"fa-solid fa-chevron-"+(isOpen?"down":"right")} style={{fontSize:10,color:"#aaa"}}/>
+                  <span style={{fontSize:13,fontWeight:700,color:"#555",flexShrink:0}}>{title}</span>
+                  {!isOpen&&summary&&<span style={{fontSize:12,color:"#999",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{summary}</span>}
+                </div>
+                {!isOpen&&filled&&<i className="fa-solid fa-check-circle" style={{color:"#22c55e",fontSize:13,flexShrink:0,marginLeft:6}}/>}
+              </div>
+              {isOpen&&<div style={{background:"#fff",border:"1px solid #eeeef2",borderTop:"none",borderRadius:"0 0 16px 16px",padding:"12px 16px"}}>{body}</div>}
+            </div>;
+          };
+          return <div>
+            {renderCol("hashtags","Hashtags",!!shared.hashtags,(shared.hashtags||""),
+              <AutoTextarea value={shared.hashtags||""} onChange={function(e){setShared("hashtags",e.target.value);}} placeholder="4 total: 1 anchor + 1-2 genre + 0-1 comp" style={Object.assign({},S.mI,{minHeight:44})}/>
+            )}
+            {renderCol("prompt","Prompt / CTA",!!shared.prompt,(shared.prompt||""),
+              <AutoTextarea value={shared.prompt||""} onChange={function(e){setShared("prompt",e.target.value);}} placeholder="Engagement question. Used as IG comment prompt." style={Object.assign({},S.mI,{minHeight:44})}/>
+            )}
+            {renderCol("music","Music / Trending Sound",!!shared.music,(shared.music||""),
+              <AutoTextarea value={shared.music||""} onChange={function(e){setShared("music",e.target.value);}} placeholder="Mood, what to search for, trending sound name..." style={Object.assign({},S.mI,{minHeight:44})}/>
+            )}
+            {renderCol("indexing","On-Screen Indexing",!!(dc&&dc.indexTopic),((dc&&dc.indexTopic)||""),
+              <div>
+                <div style={{fontSize:11,color:"#aaa",marginBottom:8}}>Two phrases baked into every video. Push All sends these as keywords to all platforms.</div>
+                <div style={{marginBottom:8}}><span style={{fontSize:12,fontWeight:600,color:"#666"}}>Evergreen</span><input type="text" value={(dc&&dc.indexEvergreen)||INDEX_EVERGREEN_DEFAULT} onChange={function(e){setMeta(day,"indexEvergreen",e.target.value);}} style={S.mI}/></div>
+                <div><span style={{fontSize:12,fontWeight:600,color:"#666"}}>Topic</span><input type="text" value={(dc&&dc.indexTopic)||""} onChange={function(e){setMeta(day,"indexTopic",e.target.value);}} placeholder="e.g. book to screen, fantasy worldbuilding" style={S.mI}/></div>
+              </div>
+            )}
+            {/* Related Video: when collapsed show ONLY file title + video title */}
+            {renderCol("related","Related Video",!!relVal,relSummary,
+              <input type="text" value={shared.relatedVideo||""} onChange={function(e){setShared("relatedVideo",e.target.value);}} placeholder="Which content piece connects to this one" style={S.mI}/>
+            )}
+            {renderCol("vaDate","VA Date",!!getVD(day,"a").date,(getVD(day,"a").date?fmtD(getVD(day,"a").date):""),
+              <input type="date" value={getVD(day,"a").date||""} onChange={function(e){onADate(day,e.target.value);}} style={S.dIn}/>
+            )}
+            {renderCol("vaTime","VA Time",!!getVD(day,"a").time,(getVD(day,"a").time||""),
+              <input type="time" value={getVD(day,"a").time||""} onChange={function(e){setVF(day,"a","time",e.target.value);}} style={S.dIn}/>
+            )}
+          </div>;
+        })()}
 
         {/* PUSH ALL BUTTON */}
         {(function(){
@@ -672,9 +711,9 @@ function App() {
           var filledCount = 0; shFields.forEach(function(f) { if (shared[f]) filledCount++; });
           var indexVal = ((dc&&dc.indexEvergreen)||INDEX_EVERGREEN_DEFAULT) + "\n" + ((dc&&dc.indexTopic)||"");
           var doPushAll = function() {
-            var captionTargets = ["tiktok","instagram","youtube","fb_personal","fb_page","x","reddit"];
+            var captionTargets = ["tiktok","instagram","youtube","fb_personal","fb_page","discord","x","reddit"];
             var hashtagTargets = ["tiktok","instagram","youtube","fb_page","x"];
-            var allTargets = ["tiktok","instagram","youtube","fb_page","fb_personal","x","reddit"];
+            var allTargets = ["tiktok","instagram","youtube","fb_page","fb_personal","discord","x","reddit"];
             if (shared.caption) captionTargets.forEach(function(pid) {
               // YouTube uses 'description', all others use 'copy'
               var fieldKey = pid === "youtube" ? "description" : "copy";
@@ -855,8 +894,12 @@ function App() {
       {/* FB GROUPS TAB */}
       {/* ============================================ */}
       {plat==="fb_groups"&&<div>
-        <div style={{background:"#3b599810",border:"1px solid #3b599830",borderRadius:14,padding:12,marginBottom:16}}>
-          <div style={{fontSize:14,fontWeight:800,color:"#3b5998",marginBottom:4}}>FB Groups (Miza, next day)</div>
+        <div style={{background:"#3b599810",border:"1px solid #3b599830",borderRadius:14,padding:12,marginBottom:16,opacity:0.9}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+            <span style={{fontSize:14,fontWeight:800,color:"#3b5998"}}>FB Groups (Miza, next day)</span>
+            <span style={{fontSize:10,fontWeight:700,background:"#9ca3af22",color:"#6b7280",borderRadius:6,padding:"2px 6px",textTransform:"uppercase",letterSpacing:0.5}}>Low priority</span>
+          </div>
+          <div style={{fontSize:11,color:"#999",marginBottom:6}}>Performance has been weak. Do these last, only if time allows.</div>
           <div style={{fontSize:12,color:"#666",lineHeight:1.6}}>
             {FB_GROUPS_PROTOCOL.source}<br/>
             {FB_GROUPS_PROTOCOL.timing}<br/>
