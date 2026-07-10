@@ -39,7 +39,7 @@ var SCHED_NOTES = {
   fb_personal: "Native app (mobile). Professional mode required.",
   fb_page: "Meta Business Suite (desktop).",
   fb_groups: "Next-day task (Miza). Share from live FB Personal post. LOW PRIORITY.",
-  discord: "Manual post in the Exousia server. No native scheduling. discord.gg/medzFWVWfh",
+  discord: "Manual post in the Exousia server, #social-media-posts channel. No native scheduling. discord.gg/medzFWVWfh",
   x: "Manual only. No scheduling without X Premium.",
   reddit: "Manual post via browser.",
 };
@@ -153,12 +153,11 @@ var CHECKLISTS = {
   ],
   discord: [
     "Open the Exousia Discord server (discord.gg/medzFWVWfh)",
-    "Post to the server (announcements or community channel)",
+    "Post in the #social-media-posts channel",
     "Include the link (link in bio / chapter / quiz link)",
     "Attach the cover image",
     "Casual community voice (talking to members, not marketing at them)",
     "0 hashtags",
-    /* TODO: confirm with Robert - exact channel(s) to post in */
     "Post"
   ],
   fb_groups: [],
