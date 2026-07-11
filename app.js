@@ -1,4 +1,4 @@
-/* TFS PUBLISH | app.js | exousia.world | rbiehn.github.io/tfs-publish | Version 49 | July 07, 2026 */
+/* TFS PUBLISH | app.js | exousia.world | rbiehn.github.io/tfs-publish | Version 50 | July 11, 2026 */
 
 var useState = React.useState;
 var useEffect = React.useEffect;
@@ -793,8 +793,8 @@ function App() {
       {/* ============================================ */}
       {!isSpecial&&plat!=="fb_groups"&&(function(){
         var platSections = getSections(plat);
-        var copyCaption = (pc && (plat === "youtube" ? pc.description : pc.copy)) || "";
-        var copyHashtags = (pc && pc.hashtags) || "";
+        var copyCaption = normHashtags((pc && (plat === "youtube" ? pc.description : pc.copy)) || "", plat);
+        var copyHashtags = normHashtags((pc && pc.hashtags) || "", plat);
         return <div>
         {/* STATUS BAR */}
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
