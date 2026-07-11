@@ -1,4 +1,4 @@
-/* TFS PUBLISH | utils.js | Version 46 | March 19, 2026 */
+/* TFS PUBLISH | utils.js | Version 47 | July 11, 2026 */
 
 var SUPABASE_URL = "https://gewufsselhrzbzrctruo.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdld3Vmc3NlbGhyemJ6cmN0cnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzA5MDYsImV4cCI6MjA5MzE0NjkwNn0.rxkzHvpy6Gkw454cSWOApp8ycf-SjqBL4yg1sj7HFXU";
@@ -360,3 +360,22 @@ function mergeDayMd(parsed, existingContent) {
 }
 
 
+/* v50: per-platform hashtag normalize (dedupe + cap to PLAT_HASHTAG_LIMITS, IG anchors #thefirststone, X uncapped) */
+function normHashtags(text, plat){
+  text = text || "";
+  var tagRe = /#[A-Za-z0-9_]+/g;
+  var found = text.match(tagRe) || [];
+  if(!found.length) return text;
+  var seen = {}, uniq = [];
+  found.forEach(function(h){ var k = h.toLowerCase(); if(!seen[k]){ seen[k] = 1; uniq.push(h); } });
+  if(plat === "instagram"){
+    var i = uniq.map(function(h){ return h.toLowerCase(); }).indexOf("#thefirststone");
+    if(i > 0){ uniq.unshift(uniq.splice(i,1)[0]); }
+    else if(i < 0){ uniq.unshift("#thefirststone"); }
+  }
+  var L = (typeof PLAT_HASHTAG_LIMITS !== "undefined") ? PLAT_HASHTAG_LIMITS : {};
+  var lim = (plat === "x") ? uniq.length : ((plat in L) ? L[plat] : uniq.length);
+  var kept = uniq.slice(0, lim);
+  var body = text.replace(tagRe, "").replace(/[ \t]+/g, " ").replace(/ *\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/\s+$/, "");
+  return kept.length ? (body + "\n\n" + kept.join(" ")) : body;
+}
