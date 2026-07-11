@@ -1,5 +1,5 @@
-/* TFS PUBLISH | utils.js | Version 48 | July 11, 2026 */
-/* Saves now go through the password-gated set-publishing-data edge function (no public writes). */
+/* TFS PUBLISH | utils.js | Version 49 | July 11, 2026 */
+/* Saves go through the password-gated set-publishing-data endpoint; password entered via in-app unlock bar (no native popups). */
 
 var SUPABASE_URL = "https://gewufsselhrzbzrctruo.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdld3Vmc3NlbGhyemJ6cmN0cnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzA5MDYsImV4cCI6MjA5MzE0NjkwNn0.rxkzHvpy6Gkw454cSWOApp8ycf-SjqBL4yg1sj7HFXU";
@@ -12,44 +12,74 @@ var STORAGE_URL = SUPABASE_URL + "/storage/v1/object/public/media/";
 
 var _saveTimers = {};
 var _lastSaved = {};
+var _pendingSaves = {};
 
-// ---- SECURE SAVE ------------------------------------------------------------
-// Writes go through the password-gated edge function, NOT the public anon key.
-// The password is entered once per device and cached locally. A wrong password
-// is cleared automatically so you get re-prompted on the next edit.
+// ---- SECURE SAVE (in-app unlock, no native popups) --------------------------
+// Writes go through the password-gated edge function, never the public anon key.
+// The password is entered once via a small in-app "unlock" bar (NOT window.prompt,
+// which browsers suppress on timer-driven calls) and cached locally. A missing or
+// wrong password shows the unlock bar and queues the save until it is provided.
 var PUBLISH_FN = SUPABASE_URL + "/functions/v1/set-publishing-data";
 
-function getPublishSecret(force) {
-  var s = "";
-  try { s = localStorage.getItem("tfs_publish_secret") || ""; } catch (e) {}
-  if (!s || force) {
-    s = window.prompt("Enter the TFS Publish save password:") || "";
-    if (s) { try { localStorage.setItem("tfs_publish_secret", s); } catch (e) {} }
+function _getSecret() { try { return localStorage.getItem("tfs_publish_secret") || ""; } catch (e) { return ""; } }
+function _setSecret(s) { try { localStorage.setItem("tfs_publish_secret", s); } catch (e) {} }
+function _clearSecret() { try { localStorage.removeItem("tfs_publish_secret"); } catch (e) {} }
+
+function _flushPending() {
+  var ids = Object.keys(_pendingSaves);
+  ids.forEach(function(id) { var v = _pendingSaves[id]; delete _pendingSaves[id]; _secureSave(id, v); });
+}
+
+function showUnlockBar(msg) {
+  var existing = document.getElementById("tfs-unlock");
+  if (existing) { var mm = existing.querySelector(".tfs-unlock-msg"); if (mm && msg) mm.textContent = msg; return; }
+  if (!document.body) { return; }
+  var css = "position:fixed;left:0;right:0;bottom:0;z-index:2147483647;"
+    + "padding:12px 14px calc(12px + env(safe-area-inset-bottom));"
+    + "background:#1a1a2e;color:#fff;box-shadow:0 -6px 24px rgba(0,0,0,.28);"
+    + "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;";
+  var bar = document.createElement("div");
+  bar.id = "tfs-unlock";
+  bar.setAttribute("style", css);
+  bar.innerHTML =
+    '<div style="max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:8px;">'
+    + '<div class="tfs-unlock-msg" style="font-size:13px;font-weight:700;letter-spacing:.3px;color:#f97316;">'
+    + (msg || "Enter your save password to sync changes") + '</div>'
+    + '<div style="display:flex;gap:8px;">'
+    + '<input type="password" class="tfs-unlock-in" autocomplete="current-password" placeholder="Save password" '
+    + 'style="flex:1;min-width:0;font-size:16px;padding:11px 12px;border:1px solid #3a3a52;border-radius:10px;background:#0f0f1e;color:#fff;outline:none;" />'
+    + '<button class="tfs-unlock-btn" style="flex:0 0 auto;font-size:15px;font-weight:800;padding:11px 16px;border:none;border-radius:10px;background:#f97316;color:#fff;cursor:pointer;">Unlock</button>'
+    + '</div></div>';
+  document.body.appendChild(bar);
+  var input = bar.querySelector(".tfs-unlock-in");
+  var btn = bar.querySelector(".tfs-unlock-btn");
+  function submit() {
+    var v = (input.value || "").trim();
+    if (!v) { input.focus(); return; }
+    _setSecret(v); bar.remove(); _flushPending();
   }
-  return s;
+  btn.addEventListener("click", submit);
+  input.addEventListener("keydown", function(e) { if (e.key === "Enter") submit(); });
+  setTimeout(function() { try { input.focus(); } catch (e) {} }, 60);
+}
+
+function _secureSave(id, val) {
+  var secret = _getSecret();
+  if (!secret) { _pendingSaves[id] = val; showUnlockBar(); return; }
+  fetch(PUBLISH_FN, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-publishing-secret": secret },
+    body: JSON.stringify({ id: id, value: val })
+  }).then(function(r) {
+    if (r.status === 401) { _clearSecret(); _pendingSaves[id] = val; showUnlockBar("That password was wrong. Try again."); }
+    else if (!r.ok) { r.text().then(function(t) { console.error("Save failed:", id, r.status, t); }); }
+  }).catch(function(e) { console.error("Save network error:", id, e); });
 }
 
 function debounceSave(id, val) {
   try { localStorage.setItem("tfs_" + id, JSON.stringify(val)); } catch (e) {}
   if (_saveTimers[id]) clearTimeout(_saveTimers[id]);
-  _saveTimers[id] = setTimeout(function() {
-    _lastSaved[id] = Date.now();
-    var secret = getPublishSecret(false);
-    if (!secret) { console.warn("Save skipped (no password) for", id); return; }
-    fetch(PUBLISH_FN, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-publishing-secret": secret },
-      body: JSON.stringify({ id: id, value: val })
-    }).then(function(r) {
-      if (r.status === 401) {
-        try { localStorage.removeItem("tfs_publish_secret"); } catch (e) {}
-        console.error("Save: wrong password (cleared). You'll be asked again on your next edit.");
-        alert("TFS Publish: save password was wrong. Make any small edit to re-enter it.");
-      } else if (!r.ok) {
-        r.text().then(function(t) { console.error("Save failed:", id, r.status, t); });
-      }
-    }).catch(function(e) { console.error("Save network error:", id, e); });
-  }, 1000);
+  _saveTimers[id] = setTimeout(function() { _lastSaved[id] = Date.now(); _secureSave(id, val); }, 1000);
 }
 
 function lsLoad(id, fallback) {
