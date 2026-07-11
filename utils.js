@@ -1,4 +1,5 @@
-/* TFS PUBLISH | utils.js | Version 47 | July 11, 2026 */
+/* TFS PUBLISH | utils.js | Version 48 | July 11, 2026 */
+/* Saves now go through the password-gated set-publishing-data edge function (no public writes). */
 
 var SUPABASE_URL = "https://gewufsselhrzbzrctruo.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdld3Vmc3NlbGhyemJ6cmN0cnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzA5MDYsImV4cCI6MjA5MzE0NjkwNn0.rxkzHvpy6Gkw454cSWOApp8ycf-SjqBL4yg1sj7HFXU";
@@ -11,15 +12,43 @@ var STORAGE_URL = SUPABASE_URL + "/storage/v1/object/public/media/";
 
 var _saveTimers = {};
 var _lastSaved = {};
+
+// ---- SECURE SAVE ------------------------------------------------------------
+// Writes go through the password-gated edge function, NOT the public anon key.
+// The password is entered once per device and cached locally. A wrong password
+// is cleared automatically so you get re-prompted on the next edit.
+var PUBLISH_FN = SUPABASE_URL + "/functions/v1/set-publishing-data";
+
+function getPublishSecret(force) {
+  var s = "";
+  try { s = localStorage.getItem("tfs_publish_secret") || ""; } catch (e) {}
+  if (!s || force) {
+    s = window.prompt("Enter the TFS Publish save password:") || "";
+    if (s) { try { localStorage.setItem("tfs_publish_secret", s); } catch (e) {} }
+  }
+  return s;
+}
+
 function debounceSave(id, val) {
   try { localStorage.setItem("tfs_" + id, JSON.stringify(val)); } catch (e) {}
-  if (!_sb) return;
   if (_saveTimers[id]) clearTimeout(_saveTimers[id]);
   _saveTimers[id] = setTimeout(function() {
     _lastSaved[id] = Date.now();
-    _sb.from("publishing_data").upsert({ id: id, value: val }).then(function(r) {
-      if (r.error) console.error("Save:", id, r.error);
-    });
+    var secret = getPublishSecret(false);
+    if (!secret) { console.warn("Save skipped (no password) for", id); return; }
+    fetch(PUBLISH_FN, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-publishing-secret": secret },
+      body: JSON.stringify({ id: id, value: val })
+    }).then(function(r) {
+      if (r.status === 401) {
+        try { localStorage.removeItem("tfs_publish_secret"); } catch (e) {}
+        console.error("Save: wrong password (cleared). You'll be asked again on your next edit.");
+        alert("TFS Publish: save password was wrong. Make any small edit to re-enter it.");
+      } else if (!r.ok) {
+        r.text().then(function(t) { console.error("Save failed:", id, r.status, t); });
+      }
+    }).catch(function(e) { console.error("Save network error:", id, e); });
   }, 1000);
 }
 
@@ -359,8 +388,6 @@ function mergeDayMd(parsed, existingContent) {
   return dc;
 }
 
-
-/* v50: per-platform hashtag normalize (dedupe + cap to PLAT_HASHTAG_LIMITS, IG anchors #thefirststone, X uncapped) */
 function normHashtags(text, plat){
   text = text || "";
   var tagRe = /#[A-Za-z0-9_]+/g;
