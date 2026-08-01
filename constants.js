@@ -331,7 +331,7 @@ var TEMPLATES = {
   ],
 };
 
-var YT_UNIVERSAL_TAGS = "the first stone, world of exousia, Robert Biehn, fantasy books, ya books, ya fantasy, epic fantasy, dystopian books, dystopian fantasy, dark fantasy, debut author, writing life, worldbuilding, found family, sibling bonds, morally grey, elemental powers, regime oppression, shadow and bone, an ember in the ashes, red rising, booktok, fantasy book recommendations, books like shadow and bone, fantasy series, hunger games, fourth wing, mistborn, children of blood and bone, ya lit";
+var YT_UNIVERSAL_TAGS = "YA fantasy, YA dystopian fantasy, dystopian fantasy, epic fantasy, dark fantasy, clean fantasy, Shadow and Bone, An Ember in the Ashes, Red Rising, Mistborn, Grishaverse, Children of Blood and Bone, Hunger Games, Divergent, Avatar the Last Airbender, books like Shadow and Bone, Brandon Sanderson, found family, sibling bonds, morally gray characters, elemental magic, magic system, worldbuilding, oppression, booktok, fantasy book recommendations, fantasy series, fantasy TBR, ya lit, fantasy books";
 
 var INDEX_EVERGREEN_DEFAULT = "YA dystopian fantasy author";
 
