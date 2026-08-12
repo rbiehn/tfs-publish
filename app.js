@@ -243,7 +243,7 @@ function App() {
 
   var genTasks = function() {
     var tasks = []; var tid = 0;
-    var shFields = ["title", "caption", "hashtags", "prompt", "music"];
+    var shFields = ["title", "caption", "onScreenPrompt"];
     var shDone = 0; shFields.forEach(function(f) { if (taskSh[f]) shDone++; });
     tasks.push({ id: tid++, phase: "prep", label: "Prep shared fields (" + shDone + "/" + shFields.length + ")", done: shDone === shFields.length, nav: function() { setDay(taskDay); setPlat("shared"); goTo("publish"); } });
     var mDone = (media["d" + taskDay + "_v" + taskVer] || {}).mediaStatus === "final";
@@ -675,15 +675,7 @@ function App() {
               {isOpen&&<div style={{background:"#fff",border:"1px solid #eeeef2",borderTop:"none",borderRadius:"0 0 16px 16px",padding:"12px 16px"}}>{body}</div>}
             </div>;
           };
-          return <div>
-            {renderCol("hashtags","Hashtags",!!shared.hashtags,(shared.hashtags||""),
-              <AutoTextarea value={shared.hashtags||""} onChange={function(e){setShared("hashtags",e.target.value);}} placeholder="4 total: 1 anchor + 1-2 genre + 0-1 comp" style={Object.assign({},S.mI,{minHeight:44})}/>
-            )}
-            {renderCol("prompt","Prompt / CTA",!!shared.prompt,(shared.prompt||""),
-              <AutoTextarea value={shared.prompt||""} onChange={function(e){setShared("prompt",e.target.value);}} placeholder="Engagement question. Used as IG comment prompt." style={Object.assign({},S.mI,{minHeight:44})}/>
-            )}
-            {renderCol("music","Music / Trending Sound",!!shared.music,(shared.music||""),
-              <AutoTextarea value={shared.music||""} onChange={function(e){setShared("music",e.target.value);}} placeholder="Mood, what to search for, trending sound name..." style={Object.assign({},S.mI,{minHeight:44})}/>
+          return <div><span style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:4,display:"block"}}>On-Screen Prompt</span><div style={{fontSize:11,color:"#aaa",marginBottom:8}}>The large text block burned into the video. This is the hook, not the indexing phrases below.</div><AutoTextarea value={shared.onScreenPrompt||""} onChange={function(e){setShared("onScreenPrompt",e.target.value);}} placeholder="READERS: what is the saddest line you have ever read?" style={Object.assign({},S.mI,{minHeight:60})}/><AlgoW flags={scanAlgo(shared.onScreenPrompt||"")}/>
             )}
             {renderCol("indexing","On-Screen Indexing",!!(dc&&dc.indexTopic),((dc&&dc.indexTopic)||""),
               <div>
@@ -694,7 +686,7 @@ function App() {
             )}
             {/* Related Video: when collapsed show ONLY file title + video title */}
             {renderCol("related","Related Video",!!relVal,relSummary,
-              <input type="text" value={shared.relatedVideo||""} onChange={function(e){setShared("relatedVideo",e.target.value);}} placeholder="Which content piece connects to this one" style={S.mI}/>
+              <span style={{fontSize:12,fontWeight:600,color:"#666"}}>Canva Design</span><input type="text" value={shared.canvaLink||""} onChange={function(e){setShared("canvaLink",e.target.value);}} placeholder="canva.link" style={S.mI}/>{shared.canvaLink?<a href={shared.canvaLink} target="_blank" rel="noopener noreferrer" style={{fontSize:12,fontWeight:700,color:"#f97316",textDecoration:"none"}}>Open in Canva</a>:null}<span style={{fontSize:12,fontWeight:600,color:"#666"}}>Reference Post</span><input type="text" value={shared.refPost||""} onChange={function(e){setShared("refPost",e.target.value);}} placeholder="instagram.com reel url" style={S.mI}/>{shared.refPost?<a href={shared.refPost} target="_blank" rel="noopener noreferrer" style={{fontSize:12,fontWeight:700,color:"#f97316",textDecoration:"none"}}>Open reference</a>:null}
             )}
             {renderCol("vaDate","VA Date",!!getVD(day,"a").date,(getVD(day,"a").date?fmtD(getVD(day,"a").date):""),
               <input type="date" value={getVD(day,"a").date||""} onChange={function(e){onADate(day,e.target.value);}} style={S.dIn}/>
@@ -707,7 +699,7 @@ function App() {
 
         {/* PUSH ALL BUTTON */}
         {(function(){
-          var shFields = ["title","caption","hashtags","prompt","music"];
+          var shFields = ["title","caption","onScreenPrompt"];
           var filledCount = 0; shFields.forEach(function(f) { if (shared[f]) filledCount++; });
           var indexVal = ((dc&&dc.indexEvergreen)||INDEX_EVERGREEN_DEFAULT) + "\n" + ((dc&&dc.indexTopic)||"");
           var doPushAll = function() {
@@ -732,7 +724,7 @@ function App() {
               <i className="fa-solid fa-paper-plane"/><span>Push All to Platforms</span>
             </button>
             <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:8,flexWrap:"wrap"}}>
-              {["title","caption","hashtags","prompt","music"].map(function(f){var filled = !!shared[f]; return <span key={f} style={{fontSize:11,fontWeight:600,color:filled?"#22c55e":"#ccc"}}>{filled?"\u2713":"\u25cb"} {f}</span>;})}
+              {["title","caption","onScreenPrompt"].map(function(f){var filled = !!shared[f]; return <span key={f} style={{fontSize:11,fontWeight:600,color:filled?"#22c55e":"#ccc"}}>{filled?"\u2713":"\u25cb"} {f}</span>;})}
               <span style={{fontSize:11,fontWeight:600,color:(dc&&dc.indexTopic)?"#22c55e":"#ccc"}}>{(dc&&dc.indexTopic)?"\u2713":"\u25cb"} indexing</span>
             </div>
           </div>;
