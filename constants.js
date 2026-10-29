@@ -294,26 +294,30 @@ var STORY_CHECKLISTS = {
 var TEMPLATES = {
   tiktok: [
     { key: "copy", label: "Caption", hint: "100-300ch, 4000 max. ONE CTA.", max: 4000, multi: true },
-    { key: "hashtags", label: "Hashtags", hint: "4 total: 1 anchor + 1-2 genre + 0-1 comp" }
+    { key: "hashtags", label: "Hashtags", hint: "4 total: 1 anchor + 1-2 genre + 0-1 comp" },
+    { key: "prompt", label: "Pinned Comment", hint: "Post right after publishing, then pin it. Platform link, not STONE.", multi: true }
   ],
   instagram: [
     { key: "copy", label: "Caption", hint: "125-200ch. Google indexes. ONE CTA.", max: 2200, multi: true },
     { key: "hashtags", label: "Hashtags", hint: "5 max: #thefirststone + 4" },
-    { key: "prompt", label: "Comment Prompt", hint: "Pinned question at top of comments" }
+    { key: "prompt", label: "Pinned Comment", hint: "Pinned question at top of comments", multi: true }
   ],
   youtube: [
     { key: "title", label: "Title", hint: "100ch limit. Title Case. End with 1-3 hashtags.", max: 100 },
     { key: "description", label: "Description", hint: "Add from desktop. Hashtags go here.", multi: true },
-    { key: "hashtags", label: "Hashtags", hint: "2-3 discovery, no #Shorts" }
+    { key: "hashtags", label: "Hashtags", hint: "2-3 discovery, no #Shorts" },
+    { key: "prompt", label: "Pinned Comment", hint: "Post right after publishing, then pin it. Platform link, not STONE.", multi: true }
   ],
   fb_personal: [
     { key: "title", label: "Title", hint: "Auto-filled from shared. Should match YT title (without hashtags)." },
-    { key: "copy", label: "Caption", hint: "Casual Robert. No hashtags/CTAs.", multi: true }
+    { key: "copy", label: "Caption", hint: "Casual Robert. No hashtags/CTAs.", multi: true },
+    { key: "prompt", label: "Pinned Comment", hint: "Post right after publishing, then pin it. Platform link, not STONE.", multi: true }
   ],
   fb_page: [
     { key: "copy", label: "Caption", hint: "Polished brand voice. Links in comment only.", multi: true },
     { key: "reel_title", label: "Reel Title", hint: "Required" },
-    { key: "hashtags", label: "Hashtags", hint: "0-1" }
+    { key: "hashtags", label: "Hashtags", hint: "0-1" },
+    { key: "prompt", label: "Pinned Comment", hint: "Post right after publishing, then pin it. Platform link, not STONE.", multi: true }
   ],
   discord: [
     { key: "copy", label: "Message", hint: "Casual community voice. 2000 max. Include link + cover image. 0 hashtags.", max: 2000, multi: true }
