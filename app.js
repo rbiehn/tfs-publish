@@ -5,8 +5,9 @@ var useEffect = React.useEffect;
 
 function App() {
   // ---- STATE ----
-  var _v = useState("tasks"), view = _v[0], setView = _v[1];
-  var _pv = useState("tasks"), prevView = _pv[0], setPrevView = _pv[1];
+  var _v = useState("publish"), view = _v[0], setView = _v[1];
+  var _pv = useState("publish"), prevView = _pv[0], setPrevView = _pv[1];
+  var _arch = useState(false), showArch = _arch[0], setShowArch = _arch[1];
   var goTo = function(v) { setPrevView(view); setView(v); };
   var goBack = function() { var target = prevView || "tasks"; setPrevView("tasks"); setView(target); };
   var _d = useState(1), day = _d[0], setDay = _d[1];
@@ -48,7 +49,9 @@ function App() {
   useEffect(function() { if (loaded) { try { localStorage.setItem("tfs_streakDates", JSON.stringify(streakDates)); } catch (e) {} } }, [streakDates]);
   useEffect(function() { if (loaded) { try { localStorage.setItem("tfs_analytics", JSON.stringify(analytics)); } catch (e) {} } }, [analytics]);
   useEffect(function() { var iv = setInterval(function() { setTick(function(t) { return t + 1; }); }, 1000); return function() { clearInterval(iv); }; }, []);
-  useEffect(function() { var params = new URLSearchParams(window.location.search); var pDay = params.get("day"); var pVer = params.get("ver"); if (pDay) setDay(parseInt(pDay)); if (pVer) setVer(pVer); if (pDay || pVer) window.history.replaceState({}, "", window.location.pathname); }, []);
+  useEffect(function() { var params = new URLSearchParams(window.location.search); var pDay = params.get("day"); var pVer = params.get("ver"); if (pDay) { setDay(parseInt(pDay)); window.__tfsUrlDay = true; } if (pVer) setVer(pVer); if (pDay || pVer) window.history.replaceState({}, "", window.location.pathname); }, []);
+
+  useEffect(function() { if (!loaded || window.__tfsUrlDay || window.__tfsAutoDay) return; var ks = Object.keys(content).filter(function(k) { return /^\d+$/.test(k) && content[k] && content[k].topicTitle; }); if (!ks.length) return; window.__tfsAutoDay = true; var first = orderedDays[0] || postedDays[0]; if (first) setDay(first); }, [loaded, content]);
 
   // ---- SUPABASE LOAD ----
   useEffect(function() {
@@ -212,6 +215,14 @@ function App() {
   var dayAllDone = function(d) { var all = true; REAL_PLATFORMS.forEach(function(p) { if ((statuses["d" + d + "_" + p.id] || "not_started") !== "done") all = false; }); return all; };
   var getCopyDiff = function(d) { var dc2 = content[d]; if (!dc2 || !dc2.shared || !dc2.shared.caption) return []; var base = dc2.shared.caption; var diffs = []; REAL_PLATFORMS.forEach(function(rp) { var pcc = dc2.platforms && dc2.platforms[rp.id]; var platCopy = (pcc && (rp.id === "youtube" ? pcc.description : pcc.copy)) || ""; if (!platCopy) return; if (platCopy === base) diffs.push({ plat: rp, status: "match" }); else diffs.push({ plat: rp, status: "edited", copy: platCopy }); }); return diffs; };
   var titleFor = function(d) { return (content[d] && content[d].topicTitle) || "#" + d; };
+  var addedTs = function(d) { var t = (content[d] && content[d].topicTitle) || ""; var m = t.match(/^\[(\d{1,2})\/(\d{1,2})\/(\d{2,4})\]/); if (!m) return 0; var y = parseInt(m[3]); if (y < 100) y += 2000; return new Date(y, parseInt(m[1]) - 1, parseInt(m[2])).getTime(); };
+  var isPostedDay = function(d) { var c = content[d]; if (!c || !c.platforms) return false; var n = 0, ok = true; REAL_PLATFORMS.forEach(function(p) { var pc2 = c.platforms[p.id]; if (!pc2 || !(pc2.copy || pc2.description)) return; n++; var s2 = statuses["d" + d + "_" + p.id] || "not_started"; if (s2 !== "posted" && s2 !== "done") ok = false; }); return n > 0 && ok; };
+  var allDayNums = Object.keys(content).filter(function(k) { return /^\d+$/.test(k) && content[k] && content[k].topicTitle; }).map(Number);
+  var byNewest = function(a, b) { return (addedTs(b) - addedTs(a)) || (b - a); };
+  var orderedDays = allDayNums.filter(function(d) { return !isPostedDay(d); }).sort(byNewest);
+  var postedDays = allDayNums.filter(isPostedDay).sort(byNewest);
+  var navList = orderedDays.indexOf(day) !== -1 ? orderedDays : postedDays.indexOf(day) !== -1 ? postedDays : orderedDays;
+  var stepDay = function(dir) { var i = navList.indexOf(day); var nd = i === -1 ? navList[0] : navList[i + dir]; if (nd) setDay(nd); };
 
   // ---- TIMER ----
   var timerMs = 0; var timerPlat = ""; var timerDay = 0;
@@ -594,7 +605,7 @@ function App() {
 
       {/* CONTENT PIECE SELECTOR */}
       <div style={{display:"flex",alignItems:"center",padding:"8px 8px",gap:3}}>
-        <button onClick={function(){setDay(Math.max(1,day-1));setShowDelDay(false);}} style={S.dArr}>{"\u2039"}</button>
+        <button onClick={function(){stepDay(-1);setShowDelDay(false);}} style={S.dArr}>{"\u2039"}</button>
         <button onClick={function(){setShowDP(!showDP);}} style={S.dDisp}>
           <span style={{fontSize:15,fontWeight:800,color:"#f97316"}}>{videoTitle || "(untitled #" + day + ")"}{dayAllDone(day)?" \u2713":""}</span>
           <span style={{fontSize:12,color:"#777"}}>{schedDate}</span>
@@ -602,9 +613,9 @@ function App() {
             {sLevel&&sLevel.id!=="none"&&<span style={{fontSize:10,background:sLevel.color+"18",border:"1px solid "+sLevel.color+"33",borderRadius:4,padding:"1px 5px",color:sLevel.color}}>{sLevel.label}</span>}
           </div>
         </button>
-        <button onClick={function(){setDay(Math.min(dayCount,day+1));setShowDelDay(false);}} style={S.dArr}>{"\u203a"}</button>
+        <button onClick={function(){stepDay(1);setShowDelDay(false);}} style={S.dArr}>{"\u203a"}</button>
       </div>
-      {showDP&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))",gap:3,padding:"4px 12px 8px"}}>{Array.from({length:dayCount},function(_,i){return i+1;}).map(function(d){var t3=titleFor(d);return <button key={d} onClick={function(){setDay(d);setShowDP(false);}} style={{background:d===day?"#f9731620":"#fff",border:"1px solid "+(d===day?"#f97316":"#eeeef2"),borderRadius:8,padding:"6px 4px",cursor:"pointer",textAlign:"left",opacity:content[d]?1:0.35}}><div style={{fontSize:12,fontWeight:700,color:dayAllDone(d)?"#22c55e":"#444",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t3}</div><div style={{fontSize:10,color:"#aaa"}}>{dayPct(d)}%</div></button>;})}</div>}
+      {showDP&&<div style={{padding:"4px 12px 8px"}}><div style={{fontSize:11,fontWeight:800,color:"#999",letterSpacing:1,margin:"2px 0 4px"}}>NEWEST FIRST ({orderedDays.length})</div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))",gap:3}}>{orderedDays.map(function(d){var t3=titleFor(d);return <button key={d} onClick={function(){setDay(d);setShowDP(false);}} style={{background:d===day?"#f9731620":"#fff",border:"1px solid "+(d===day?"#f97316":"#eeeef2"),borderRadius:8,padding:"6px 4px",cursor:"pointer",textAlign:"left",opacity:content[d]?1:0.35}}><div style={{fontSize:12,fontWeight:700,color:dayAllDone(d)?"#22c55e":"#444",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t3}</div><div style={{fontSize:10,color:"#aaa"}}>{dayPct(d)}%</div></button>;})}</div><button onClick={function(){setShowArch(!showArch);}} style={{marginTop:8,background:"none",border:"1px solid #eeeef2",borderRadius:8,padding:"6px 10px",fontSize:12,fontWeight:700,color:"#22c55e",cursor:"pointer",width:"100%"}}>{showArch?"Hide":"Show"} Posted archive ({postedDays.length})</button>{showArch&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))",gap:3,marginTop:6}}>{postedDays.map(function(d){var t3=titleFor(d);return <button key={d} onClick={function(){setDay(d);setShowDP(false);}} style={{background:d===day?"#f9731620":"#fff",border:"1px solid "+(d===day?"#f97316":"#eeeef2"),borderRadius:8,padding:"6px 4px",cursor:"pointer",textAlign:"left",opacity:content[d]?1:0.35}}><div style={{fontSize:12,fontWeight:700,color:dayAllDone(d)?"#22c55e":"#444",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t3}</div><div style={{fontSize:10,color:"#aaa"}}>{dayPct(d)}%</div></button>;})}</div>}</div>}
 
       {/* VERSION TABS */}
       <div style={{display:"flex",gap:3,padding:"4px 12px",overflowX:"auto"}}>{VERSIONS.map(function(v2){var vdi=getVD(day,v2.id);var vmk="d"+day+"_v"+v2.id;var vms=(media[vmk]||{}).mediaStatus||"no_media";return <button key={v2.id} onClick={function(){setVer(v2.id);}} style={{background:ver===v2.id?"#f9731620":"#fff",border:"1px solid "+(ver===v2.id?"#f97316":"#eeeef2"),borderRadius:10,padding:"9px 12px",fontSize:12,color:ver===v2.id?"#f97316":"#999",cursor:"pointer",flex:1,textAlign:"center",fontWeight:700,display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}><span>{v2.label}</span>{vdi.date&&<span style={{fontSize:10,color:"#888"}}>{fmtD(vdi.date)}</span>}<span style={{width:7,height:7,borderRadius:"50%",background:M_ST_C[vms],position:"absolute",top:3,right:3}}/></button>;})}</div>
